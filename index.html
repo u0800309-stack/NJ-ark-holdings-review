@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>方舟持股複盤台</title>
+    <meta
+      name="description"
+      content="匯入持股庫存，依照方舟複盤架構分析部位、結構、位階、調節、風控水位與大盤脈絡。"
+    />
+    <meta name="theme-color" content="#183c4a" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f2ec;
+        --surface: #fffdf8;
+        --surface-2: #f8faf6;
+        --ink: #172027;
+        --muted: #66757c;
+        --line: #d9ddd6;
+        --navy: #183c4a;
+        --teal: #147a78;
+        --amber: #d7a93e;
+        --red: #bd4f48;
+        --green: #437f53;
+        --blue: #456aa8;
+        --shadow: 0 18px 44px rgba(25, 42, 48, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          linear-gradient(90deg, rgba(23, 32, 39, 0.035) 1px, transparent 1px),
+          linear-gradient(rgba(23, 32, 39, 0.035) 1px, transparent 1px),
+          var(--bg);
+        background-size: 30px 30px;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "Noto Sans TC", sans-serif;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-bottom: 1px solid var(--line);
+        background: rgba(244, 242, 236, 0.92);
+        backdrop-filter: blur(16px);
+      }
+
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: min(1320px, calc(100% - 28px));
+        min-height: 66px;
+        margin: 0 auto;
+        gap: 14px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 40px;
+        height: 40px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--navy);
+        color: #fff;
+        font-weight: 900;
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: 0;
+      }
+
+      .brand p {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        padding: 0 13px;
+        font-weight: 760;
+        white-space: nowrap;
+      }
+
+      .btn.primary {
+        border-color: var(--navy);
+        background: var(--navy);
+        color: #fff;
+      }
+
+      .btn.danger {
+        border-color: rgba(189, 79, 72, 0.35);
+        color: var(--red);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 380px minmax(0, 1fr);
+        width: min(1320px, calc(100% - 28px));
+        margin: 0 auto;
+        gap: 16px;
+        padding: 16px 0 30px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 253, 248, 0.94);
+        box-shadow: var(--shadow);
+      }
+
+      .panel + .panel {
+        margin-top: 16px;
+      }
+
+      .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid var(--line);
+        padding: 14px 16px;
+      }
+
+      .panel-head h2,
+      .panel-head h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .panel-body {
+        padding: 16px;
+      }
+
+      .dropzone {
+        display: grid;
+        place-items: center;
+        min-height: 150px;
+        border: 1.5px dashed #9daba6;
+        border-radius: 8px;
+        background: var(--surface-2);
+        padding: 18px;
+        text-align: center;
+      }
+
+      .dropzone strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 17px;
+      }
+
+      .dropzone span,
+      .hint {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .hint {
+        margin: 10px 0 0;
+      }
+
+      .file-input {
+        width: 100%;
+        margin-top: 14px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: #344047;
+        font-size: 13px;
+        font-weight: 720;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+      }
+
+      input {
+        min-height: 38px;
+        padding: 0 10px;
+      }
+
+      textarea {
+        resize: vertical;
+        padding: 12px;
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      #csvInput {
+        min-height: 190px;
+      }
+
+      #marketContext {
+        min-height: 118px;
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 14px;
+      }
+
+      .metric span {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 8px;
+        font-size: clamp(20px, 2.6vw, 30px);
+        line-height: 1;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 14px 16px 0;
+      }
+
+      .tab {
+        min-height: 36px;
+        border: 1px solid var(--line);
+        border-radius: 8px 8px 0 0;
+        background: #f8f8f2;
+        padding: 0 12px;
+        color: var(--muted);
+        font-weight: 760;
+      }
+
+      .tab.active {
+        border-color: var(--navy);
+        background: var(--navy);
+        color: #fff;
+      }
+
+      .tab-panel {
+        display: none;
+        padding: 16px;
+      }
+
+      .tab-panel.active {
+        display: block;
+      }
+
+      .review-output {
+        display: grid;
+        gap: 12px;
+      }
+
+      .section-card {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .section-card .number {
+        display: grid;
+        place-items: center;
+        background: var(--navy);
+        color: #fff;
+        font-weight: 900;
+      }
+
+      .section-card article {
+        padding: 14px;
+      }
+
+      .section-card h3 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+
+      .section-card p {
+        margin: 0;
+        color: #3f4b52;
+        line-height: 1.75;
+        white-space: pre-line;
+      }
+
+      .empty {
+        display: grid;
+        min-height: 280px;
+        place-items: center;
+        border: 1px dashed #b8c0bb;
+        border-radius: 8px;
+        color: var(--muted);
+        text-align: center;
+        padding: 24px;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        max-height: 560px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      table {
+        width: 100%;
+        min-width: 1040px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid #edf0eb;
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+        font-size: 13px;
+      }
+
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f2f5ef;
+        color: #45535a;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        border-radius: 999px;
+        padding: 0 9px;
+        font-size: 12px;
+        font-weight: 820;
+        white-space: nowrap;
+      }
+
+      .badge.red {
+        background: rgba(189, 79, 72, 0.14);
+        color: var(--red);
+      }
+
+      .badge.amber {
+        background: rgba(215, 169, 62, 0.2);
+        color: #7d5b12;
+      }
+
+      .badge.green {
+        background: rgba(67, 127, 83, 0.15);
+        color: var(--green);
+      }
+
+      .badge.blue {
+        background: rgba(69, 106, 168, 0.14);
+        color: var(--blue);
+      }
+
+      .rules {
+        display: grid;
+        gap: 10px;
+      }
+
+      .rules code {
+        display: block;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f9faf7;
+        padding: 10px;
+        color: #334047;
+        white-space: normal;
+      }
+
+      .toast {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 30;
+        max-width: min(420px, calc(100% - 32px));
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: var(--shadow);
+        padding: 12px 14px;
+        color: #334047;
+        transform: translateY(20px);
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s ease;
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      @media (max-width: 1120px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .topbar-inner {
+          align-items: stretch;
+          flex-direction: column;
+          padding: 12px 0;
+        }
+
+        .actions,
+        .grid-2 {
+          grid-template-columns: 1fr;
+          display: grid;
+        }
+
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">ARK</div>
+          <div>
+            <h1>方舟持股複盤台</h1>
+            <p>匯入持股庫存，輸出部位、結構、位階、調節與風控結論。</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="loadSample" type="button">載入範例</button>
+          <button class="btn primary" id="runReview" type="button">生成方舟複盤</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>匯入持股庫存</h2>
+          </div>
+          <div class="panel-body">
+            <div class="dropzone" id="dropzone">
+              <div>
+                <strong>拖放 CSV 到這裡</strong>
+                <span>或選擇檔案。你也可以直接貼上庫存表。</span>
+                <input class="file-input" id="fileInput" type="file" accept=".csv,text/csv" />
+              </div>
+            </div>
+            <p class="hint">
+              建議欄位：symbol, name, sector, shares, avgCost, price, thesis, level。
+            </p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>貼上庫存表</h3>
+            <button class="btn danger" id="clearData" type="button">清空</button>
+          </div>
+          <div class="panel-body">
+            <textarea
+              id="csvInput"
+              spellcheck="false"
+              placeholder="symbol,name,sector,shares,avgCost,price,thesis,level&#10;2330,台積電,半導體,1000,780,820,AI 與先進製程長線邏輯,中高"
+            ></textarea>
+            <p class="hint">
+              中文欄名也可用：代號、名稱、產業、股數、均價、現價、邏輯、位階。
+            </p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>資金與脈絡</h3>
+          </div>
+          <div class="panel-body">
+            <div class="grid-2">
+              <label>
+                現金
+                <input id="cashInput" type="number" min="0" value="120000" />
+              </label>
+              <label>
+                風控滿倉上限 %
+                <input id="maxInvested" type="number" min="1" max="100" value="80" />
+              </label>
+              <label>
+                單一持股上限 %
+                <input id="singleLimit" type="number" min="1" max="100" value="25" />
+              </label>
+              <label>
+                高位階警戒 %
+                <input id="highGain" type="number" min="1" value="20" />
+              </label>
+            </div>
+            <label style="margin-top: 12px">
+              時事 / 總經 / 大盤脈絡
+              <textarea
+                id="marketContext"
+                placeholder="例：台股接近前高，AI 權值股強勢但輪動加快；美國利率仍偏高，市場等待降息訊號；新台幣匯率波動影響電子股評價。"
+              ></textarea>
+            </label>
+          </div>
+        </section>
+      </aside>
+
+      <section>
+        <section class="metrics" aria-label="持股總覽">
+          <div class="metric">
+            <span>總資產</span>
+            <strong id="metricAssets">$0</strong>
+          </div>
+          <div class="metric">
+            <span>股票水位</span>
+            <strong id="metricInvested">0%</strong>
+          </div>
+          <div class="metric">
+            <span>未實現損益</span>
+            <strong id="metricPnl">$0</strong>
+          </div>
+          <div class="metric">
+            <span>最大部位</span>
+            <strong id="metricLargest">0%</strong>
+          </div>
+          <div class="metric">
+            <span>需檢討檔數</span>
+            <strong id="metricWatch">0</strong>
+          </div>
+        </section>
+
+        <section class="panel" style="margin-top: 16px">
+          <div class="panel-head">
+            <h2>方舟複盤結果</h2>
+            <span class="badge blue" id="statusText">等待匯入</span>
+          </div>
+          <div class="tabs" role="tablist" aria-label="結果分頁">
+            <button class="tab active" data-tab="review" type="button">方舟複盤</button>
+            <button class="tab" data-tab="holdings" type="button">持股明細</button>
+            <button class="tab" data-tab="rules" type="button">複盤指令</button>
+          </div>
+
+          <div class="tab-panel active" id="review">
+            <div class="empty" id="emptyState">
+              先匯入持股 CSV，補上現金與大盤脈絡，再按「生成方舟複盤」。
+            </div>
+            <div class="review-output" id="reviewOutput" hidden></div>
+          </div>
+
+          <div class="tab-panel" id="holdings">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>狀態</th>
+                    <th>代號</th>
+                    <th>名稱</th>
+                    <th>產業</th>
+                    <th class="num">市值</th>
+                    <th class="num">佔比</th>
+                    <th class="num">損益</th>
+                    <th class="num">損益率</th>
+                    <th>位階</th>
+                    <th>持有邏輯</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody">
+                  <tr>
+                    <td colspan="10">尚無資料</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="rules">
+            <div class="rules">
+              <code>1. 先講總結：整體部位狀態、市場環境、複盤核心重點。</code>
+              <code>2. 庫存總覽：持股狀況、資金分布、損益概況、主要影響績效部位。</code>
+              <code>3. 部位結構：集中度、平衡度、風險是否過高、結構是否健康。</code>
+              <code>4. 各檔檢視：逐檔說明位階、部位大小與邏輯是否仍成立。</code>
+              <code>5. 方舟位階排序：報酬不如預期、高位階需調節、題材強但位階不佳。</code>
+              <code>6. 調節四問：邏輯、資金效率、替代配置、續抱風險與機會。</code>
+              <code>7. 風控水位：判斷目前整體資金使用是否合理。</code>
+              <code>8. 時事 / 總經 / 大盤：整合對部位是加分或扣分。</code>
+              <code>9. 最後總結評估：優勢、風險、接下來觀察重點。</code>
+              <code>10. 一句操作結論：收斂成明確方向。</code>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      const sampleCsv = `symbol,name,sector,shares,avgCost,price,thesis,level
+2330,台積電,半導體,1000,780,820,AI 與先進製程長線邏輯仍在,中高
+2454,聯發科,IC設計,300,1180,1125,手機復甦與邊緣 AI 題材,中
+2317,鴻海,電子代工,2000,156,188,AI 伺服器帶動評價重估,高
+2881,富邦金,金融,3000,74,81,金融股防禦與股息配置,中
+2603,長榮,航運,1000,205,178,運價題材轉弱但股息仍有支撐,中低
+00919,群益台灣精選高息,ETF,8000,24.6,25.2,高股息現金流配置,中`;
+
+      const aliases = {
+        symbol: ["symbol", "代號", "股票代號", "ticker"],
+        name: ["name", "名稱", "股票名稱", "標的", "品名"],
+        sector: ["sector", "產業", "分類", "類股"],
+        shares: ["shares", "股數", "庫存", "張數", "數量"],
+        avgCost: ["avgcost", "均價", "成本", "平均成本", "買進均價"],
+        price: ["price", "現價", "市價", "收盤價", "價格"],
+        thesis: ["thesis", "邏輯", "持有邏輯", "題材", "理由"],
+        level: ["level", "位階", "位置"],
+      };
+
+      const state = {
+        rows: [],
+        analyzed: [],
+      };
+
+      const els = {
+        fileInput: document.querySelector("#fileInput"),
+        dropzone: document.querySelector("#dropzone"),
+        csvInput: document.querySelector("#csvInput"),
+        cashInput: document.querySelector("#cashInput"),
+        maxInvested: document.querySelector("#maxInvested"),
+        singleLimit: document.querySelector("#singleLimit"),
+        highGain: document.querySelector("#highGain"),
+        marketContext: document.querySelector("#marketContext"),
+        loadSample: document.querySelector("#loadSample"),
+        runReview: document.querySelector("#runReview"),
+        clearData: document.querySelector("#clearData"),
+        metricAssets: document.querySelector("#metricAssets"),
+        metricInvested: document.querySelector("#metricInvested"),
+        metricPnl: document.querySelector("#metricPnl"),
+        metricLargest: document.querySelector("#metricLargest"),
+        metricWatch: document.querySelector("#metricWatch"),
+        statusText: document.querySelector("#statusText"),
+        emptyState: document.querySelector("#emptyState"),
+        reviewOutput: document.querySelector("#reviewOutput"),
+        tableBody: document.querySelector("#tableBody"),
+        toast: document.querySelector("#toast"),
+      };
+
+      function parseCsv(text) {
+        const rows = [];
+        let current = [];
+        let cell = "";
+        let quote = false;
+
+        for (let i = 0; i < text.length; i += 1) {
+          const char = text[i];
+          const next = text[i + 1];
+          if (char === '"' && quote && next === '"') {
+            cell += '"';
+            i += 1;
+          } else if (char === '"') {
+            quote = !quote;
+          } else if (char === "," && !quote) {
+            current.push(cell.trim());
+            cell = "";
+          } else if ((char === "\n" || char === "\r") && !quote) {
+            if (char === "\r" && next === "\n") i += 1;
+            current.push(cell.trim());
+            if (current.some(Boolean)) rows.push(current);
+            current = [];
+            cell = "";
+          } else {
+            cell += char;
+          }
+        }
+
+        current.push(cell.trim());
+        if (current.some(Boolean)) rows.push(current);
+        return rows;
+      }
+
+      function normalizeHeader(value) {
+        return value.toLowerCase().replace(/\s|_|-/g, "");
+      }
+
+      function findColumn(headers, key) {
+        const normalized = headers.map(normalizeHeader);
+        const options = aliases[key].map(normalizeHeader);
+        return normalized.findIndex((item) => options.includes(item));
+      }
+
+      function toNumber(value, fallback = 0) {
+        const num = Number(String(value ?? "").replace(/[,$\s]/g, ""));
+        return Number.isFinite(num) ? num : fallback;
+      }
+
+      function loadCsv(text) {
+        const raw = text.trim();
+        els.csvInput.value = raw;
+        const parsed = parseCsv(raw);
+        if (parsed.length < 2) {
+          resetView("資料列不足，請確認第一列是欄位名稱。");
+          return;
+        }
+
+        const headers = parsed[0];
+        const index = Object.fromEntries(Object.keys(aliases).map((key) => [key, findColumn(headers, key)]));
+        const missing = ["symbol", "name", "shares", "avgCost", "price"].filter((key) => index[key] < 0);
+        if (missing.length) {
+          resetView(`缺少必要欄位：${missing.join(", ")}。`);
+          return;
+        }
+
+        state.rows = parsed.slice(1).map((row) => ({
+          symbol: row[index.symbol] || "-",
+          name: row[index.name] || "未命名",
+          sector: index.sector >= 0 ? row[index.sector] || "未分類" : "未分類",
+          shares: toNumber(row[index.shares]),
+          avgCost: toNumber(row[index.avgCost]),
+          price: toNumber(row[index.price]),
+          thesis: index.thesis >= 0 ? row[index.thesis] || "未填寫持有邏輯" : "未填寫持有邏輯",
+          level: index.level >= 0 ? row[index.level] || "未標示" : "未標示",
+        }));
+
+        els.statusText.textContent = `已匯入 ${state.rows.length} 檔`;
+        els.statusText.className = "badge blue";
+        generateReview();
+      }
+
+      function analyze() {
+        const cash = toNumber(els.cashInput.value);
+        const stockValue = state.rows.reduce((sum, row) => sum + row.shares * row.price, 0);
+        const totalAssets = stockValue + cash;
+        const singleLimit = toNumber(els.singleLimit.value) / 100;
+        const highGain = toNumber(els.highGain.value) / 100;
+
+        state.analyzed = state.rows
+          .map((row) => {
+            const cost = row.shares * row.avgCost;
+            const value = row.shares * row.price;
+            const pnl = value - cost;
+            const pnlPct = cost > 0 ? pnl / cost : 0;
+            const weight = totalAssets > 0 ? value / totalAssets : 0;
+            const levelText = row.level;
+            const isHighLevel = /高|偏高|高檔|高位階/.test(levelText) || pnlPct >= highGain;
+            const isWeak = pnlPct < -0.08;
+            const isConcentrated = weight > singleLimit;
+            let status = "觀察";
+            let tone = "blue";
+            if (isConcentrated || (isHighLevel && weight > 0.12)) {
+              status = "高位階調節";
+              tone = "amber";
+            } else if (isWeak) {
+              status = "調節四問";
+              tone = "red";
+            } else if (pnlPct > 0.06 && !isHighLevel) {
+              status = "續抱追蹤";
+              tone = "green";
+            }
+            return { ...row, cost, value, pnl, pnlPct, weight, isHighLevel, isWeak, isConcentrated, status, tone };
+          })
+          .sort((a, b) => b.value - a.value);
+
+        return { cash, stockValue, totalAssets };
+      }
+
+      function generateReview() {
+        if (!state.rows.length) {
+          const typed = els.csvInput.value.trim();
+          if (typed) {
+            loadCsv(typed);
+            return;
+          }
+          resetView("請先匯入或貼上持股庫存。");
+          return;
+        }
+
+        const totals = analyze();
+        const summary = buildSummary(totals);
+        renderMetrics(totals, summary);
+        renderTable();
+        renderReview(summary, totals);
+        els.statusText.textContent = "複盤完成";
+        els.statusText.className = "badge green";
+        showToast("方舟複盤已生成。");
+      }
+
+      function buildSummary(totals) {
+        const maxInvested = toNumber(els.maxInvested.value) / 100;
+        const stockRatio = totals.totalAssets > 0 ? totals.stockValue / totals.totalAssets : 0;
+        const totalCost = state.analyzed.reduce((sum, row) => sum + row.cost, 0);
+        const totalPnl = state.analyzed.reduce((sum, row) => sum + row.pnl, 0);
+        const totalPnlPct = totalCost > 0 ? totalPnl / totalCost : 0;
+        const largest = state.analyzed[0];
+        const weak = state.analyzed.filter((row) => row.isWeak);
+        const high = state.analyzed.filter((row) => row.isHighLevel);
+        const concentrated = state.analyzed.filter((row) => row.isConcentrated);
+        const watch = state.analyzed.filter((row) => row.status !== "續抱追蹤");
+        const sectorMap = new Map();
+        state.analyzed.forEach((row) => sectorMap.set(row.sector, (sectorMap.get(row.sector) || 0) + row.weight));
+        const sectors = [...sectorMap.entries()].sort((a, b) => b[1] - a[1]);
+        const topSector = sectors[0];
+
+        let water = "合理";
+        if (stockRatio > maxInvested) water = "偏高";
+        if (stockRatio < 0.35) water = "偏低";
+
+        return { stockRatio, totalPnl, totalPnlPct, largest, weak, high, concentrated, watch, sectors, topSector, water };
+      }
+
+      function renderMetrics(totals, summary) {
+        els.metricAssets.textContent = money(totals.totalAssets);
+        els.metricInvested.textContent = percent(summary.stockRatio);
+        els.metricPnl.textContent = money(summary.totalPnl);
+        els.metricLargest.textContent = summary.largest ? percent(summary.largest.weight) : "0%";
+        els.metricWatch.textContent = String(summary.watch.length);
+      }
+
+      function renderTable() {
+        els.tableBody.innerHTML = state.analyzed
+          .map(
+            (row) => `<tr>
+              <td><span class="badge ${row.tone}">${escapeHtml(row.status)}</span></td>
+              <td>${escapeHtml(row.symbol)}</td>
+              <td>${escapeHtml(row.name)}</td>
+              <td>${escapeHtml(row.sector)}</td>
+              <td class="num">${money(row.value)}</td>
+              <td class="num">${percent(row.weight)}</td>
+              <td class="num">${money(row.pnl)}</td>
+              <td class="num">${percent(row.pnlPct)}</td>
+              <td>${escapeHtml(row.level)}</td>
+              <td>${escapeHtml(row.thesis)}</td>
+            </tr>`,
+          )
+          .join("");
+      }
+
+      function renderReview(summary, totals) {
+        els.emptyState.hidden = true;
+        els.reviewOutput.hidden = false;
+
+        const marketContext = els.marketContext.value.trim() || "目前尚未輸入即時時事與大盤脈絡，因此這段會以部位本身的水位、集中度與位階作為主要判斷；若要提高準確度，建議補上指數位置、利率、匯率、產業新聞與近期主流題材。";
+        const topNames = state.analyzed.slice(0, 3).map((row) => `${row.name} ${percent(row.weight)}`).join("、");
+        const weakNames = listNames(summary.weak, "沒有明顯報酬不如預期的部位");
+        const highNames = listNames(summary.high, "沒有明顯高位階部位");
+        const concentratedNames = listNames(summary.concentrated, "沒有單一部位超過上限");
+        const best = [...state.analyzed].sort((a, b) => b.pnl - a.pnl)[0];
+        const worst = [...state.analyzed].sort((a, b) => a.pnl - b.pnl)[0];
+        const sectorText = summary.sectors.map(([sector, weight]) => `${sector} ${percent(weight)}`).join("、");
+        const stockWaterLine = summary.water === "偏高"
+          ? "股票水位偏高，代表接下來不適合無差別加碼，應以汰弱留強、降低重複題材為主。"
+          : summary.water === "偏低"
+            ? "股票水位偏低，風險不高但也可能錯過主流行情，若大盤轉強，可以分批把資金放回勝率較高的標的。"
+            : "股票水位大致合理，可以用換股與小幅調節改善結構，不需要大幅砍倉。";
+
+        const sections = [
+          {
+            title: "先講總結",
+            body: `目前組合股票水位是 ${percent(summary.stockRatio)}，整體屬於「${summary.water}」水位；未實現損益為 ${money(summary.totalPnl)}，報酬率約 ${percent(summary.totalPnlPct)}。這次複盤核心不是單純看漲跌，而是確認三件事：第一，最大部位是否過重；第二，高位階標的是否該調節；第三，虧損或低效率部位是否還值得佔用資金。市場脈絡上，${marketContext}`,
+          },
+          {
+            title: "庫存總覽",
+            body: `目前持股市值 ${money(totals.stockValue)}，現金 ${money(totals.cash)}，總資產約 ${money(totals.totalAssets)}。前三大部位是 ${topNames || "尚無資料"}，它們決定了組合大部分波動。績效貢獻最大的是 ${best ? `${best.name}（${money(best.pnl)}）` : "無"}，拖累最大的是 ${worst ? `${worst.name}（${money(worst.pnl)}）` : "無"}。如果績效主要靠少數標的撐住，就要避免把整體組合誤判成全面健康。`,
+          },
+          {
+            title: "部位結構",
+            body: `產業分布為 ${sectorText || "尚無資料"}。目前集中度觀察重點是：${concentratedNames}。如果同一題材或同一產業佔比過高，遇到大盤回檔或題材退燒時，淨值會一起被拉下來。結構健康與否，不只看有沒有賺錢，而是看獲利來源是否分散、虧損部位是否被放任、以及現金是否足夠讓你在回檔時有選擇權。`,
+          },
+          {
+            title: "各檔檢視",
+            body: state.analyzed
+              .map((row) => `${row.name}：佔比 ${percent(row.weight)}，損益率 ${percent(row.pnlPct)}，位階標記為「${row.level}」。目前判定為「${row.status}」。持有邏輯是：${row.thesis}。`)
+              .join("\n"),
+          },
+          {
+            title: "方舟位階排序",
+            body: `報酬不如預期、需要進入調節四問的標的是：${weakNames}。高位階要留意調節的標的是：${highNames}。題材雖強但位階不具優勢的標的，通常不是不能抱，而是不能用追價心態加碼；它們比較適合等回檔、等量縮，或用分批方式降低買在高檔的風險。`,
+          },
+          {
+            title: "調節四問",
+            body: buildFourQuestions(summary.watch),
+          },
+          {
+            title: "風控水位",
+            body: `${stockWaterLine} 以你設定的滿倉上限 ${els.maxInvested.value}% 來看，現在股票水位是 ${percent(summary.stockRatio)}；單一持股上限 ${els.singleLimit.value}% 下，${concentratedNames}。風控上，最重要的是不要讓「看對題材」變成「承擔過大部位」，也不要讓虧損部位因為不想認錯而長期佔用資金。`,
+          },
+          {
+            title: "搭配時事 / 總經 / 大盤",
+            body: `這段判斷以你輸入的脈絡為準：${marketContext} 對目前部位的影響要分兩層看：如果大盤在高檔且主流股漲多，對高位階部位是扣分，因為風險報酬比下降；如果大盤仍維持多頭結構，對有基本面與資金流支撐的核心持股是加分，但操作上仍應避免把現金一次打滿。`,
+          },
+          {
+            title: "最後總結評估",
+            body: `這個組合的優勢是已經有明確核心部位，且可以透過位階與損益拆解出哪些標的是主力、哪些是拖累。主要風險是 ${summary.concentrated.length ? "集中度偏高" : "仍需持續觀察集中度"}，以及 ${summary.high.length ? "高位階部位需要調節紀律" : "若後續轉強，仍要避免追高"}。接下來最值得觀察的是最大部位是否續強、弱勢股是否止跌轉強，以及大盤量價是否支持繼續提高風險水位。`,
+          },
+          {
+            title: "一句操作結論",
+            body: buildConclusion(summary),
+          },
+        ];
+
+        els.reviewOutput.innerHTML = sections
+          .map(
+            (section, index) => `<section class="section-card">
+              <div class="number">${index + 1}</div>
+              <article>
+                <h3>${escapeHtml(section.title)}</h3>
+                <p>${escapeHtml(section.body)}</p>
+              </article>
+            </section>`,
+          )
+          .join("");
+      }
+
+      function buildFourQuestions(rows) {
+        const targets = rows.length ? rows.slice(0, 5) : state.analyzed.slice(0, 3);
+        return targets
+          .map((row) => {
+            const logic = row.thesis && row.thesis !== "未填寫持有邏輯" ? "邏輯目前仍可追蹤，但要用後續營收、法人籌碼或題材延續性驗證。" : "邏輯沒有寫清楚，這是第一個問題；沒有持有理由，就很難判斷該抱還是該賣。";
+            const efficiency = row.pnlPct < 0 ? "資金效率偏低，因為目前是虧損且佔用資金。" : row.weight > 0.15 ? "資金效率要看能否持續貢獻報酬，否則過大部位會放大波動。" : "資金效率尚可，但仍要和其他更強勢標的比較。";
+            const alternative = row.status === "調節四問" ? "若同產業有更強勢、位階更低或基本面更明確的標的，可以考慮換股。" : "若沒有更好的替代配置，可以續抱但不宜盲目加碼。";
+            const riskReward = row.isHighLevel ? "續抱機會是趨勢延續，風險是漲多後回檔；比較適合分批調節。" : "續抱機會與風險大致平衡，但要設定跌破邏輯或跌破關鍵價位的處理方式。";
+            return `${row.name}：邏輯是否還在？${logic} 資金效率高不高？${efficiency} 是否有更適合配置？${alternative} 續抱的風險與機會是否合理？${riskReward}`;
+          })
+          .join("\n");
+      }
+
+      function buildConclusion(summary) {
+        if (summary.water === "偏高" || summary.concentrated.length || summary.high.length) {
+          return "先降低高位階與過度集中部位，保留核心持股，等回檔或結構轉強再分批加碼。";
+        }
+        if (summary.weak.length) {
+          return "先處理低效率虧損部位，把資金轉回邏輯清楚、位階更合理的標的。";
+        }
+        return "目前不需要大幅調整，維持核心持股並用小幅換股提高資金效率。";
+      }
+
+      function listNames(rows, fallback) {
+        return rows.length ? rows.map((row) => `${row.name}（${percent(row.weight)}）`).join("、") : fallback;
+      }
+
+      function money(value) {
+        return new Intl.NumberFormat("zh-TW", {
+          style: "currency",
+          currency: "TWD",
+          maximumFractionDigits: 0,
+        }).format(value || 0);
+      }
+
+      function percent(value) {
+        return new Intl.NumberFormat("zh-TW", {
+          style: "percent",
+          maximumFractionDigits: 1,
+        }).format(value || 0);
+      }
+
+      function resetView(message) {
+        state.rows = [];
+        state.analyzed = [];
+        els.emptyState.hidden = false;
+        els.emptyState.textContent = message;
+        els.reviewOutput.hidden = true;
+        els.reviewOutput.innerHTML = "";
+        els.tableBody.innerHTML = '<tr><td colspan="10">尚無資料</td></tr>';
+        els.metricAssets.textContent = "$0";
+        els.metricInvested.textContent = "0%";
+        els.metricPnl.textContent = "$0";
+        els.metricLargest.textContent = "0%";
+        els.metricWatch.textContent = "0";
+        els.statusText.textContent = "等待匯入";
+        els.statusText.className = "badge blue";
+        showToast(message);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function showToast(message) {
+        els.toast.textContent = message;
+        els.toast.classList.add("show");
+        window.clearTimeout(showToast.timer);
+        showToast.timer = window.setTimeout(() => els.toast.classList.remove("show"), 2600);
+      }
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach((item) => item.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach((item) => item.classList.remove("active"));
+          tab.classList.add("active");
+          document.querySelector(`#${tab.dataset.tab}`).classList.add("active");
+        });
+      });
+
+      els.loadSample.addEventListener("click", () => {
+        els.marketContext.value = "台股位階偏高但多頭架構未破，AI 與高股息仍是市場主軸；美國利率仍影響評價，新台幣匯率波動使電子股短線容易震盪。";
+        loadCsv(sampleCsv);
+      });
+
+      els.runReview.addEventListener("click", generateReview);
+
+      els.clearData.addEventListener("click", () => {
+        els.csvInput.value = "";
+        resetView("已清空持股資料。");
+      });
+
+      els.csvInput.addEventListener("change", () => {
+        if (els.csvInput.value.trim()) loadCsv(els.csvInput.value);
+      });
+
+      els.fileInput.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        loadCsv(await file.text());
+      });
+
+      ["dragenter", "dragover"].forEach((type) => {
+        els.dropzone.addEventListener(type, (event) => {
+          event.preventDefault();
+          els.dropzone.style.borderColor = "var(--teal)";
+          els.dropzone.style.background = "#eef8f5";
+        });
+      });
+
+      ["dragleave", "drop"].forEach((type) => {
+        els.dropzone.addEventListener(type, (event) => {
+          event.preventDefault();
+          els.dropzone.style.borderColor = "#9daba6";
+          els.dropzone.style.background = "var(--surface-2)";
+        });
+      });
+
+      els.dropzone.addEventListener("drop", async (event) => {
+        const file = event.dataTransfer.files[0];
+        if (!file) return;
+        loadCsv(await file.text());
+      });
+    </script>
+  </body>
+</html>
