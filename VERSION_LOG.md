@@ -1,5 +1,13 @@
 # Version Log
 
+## 2026-05-17 - pre-517-complete-feature-restore
+
+- Commit: `73f1fdcadfa73bc5abc3620465608dfbed2b0156`
+- Scope: Restore the pre-5/17 complete feature set requested by the user.
+- Restored: `方舟複盤`, `持股明細`, `歷史績效`, `智慧工具`, `複盤指令`.
+- Included tools: CSV import, target price consensus, portfolio stress test, voice review reading, local history snapshots.
+- Recovery note: to restore this version later, reset `main` to commit `73f1fdcadfa73bc5abc3620465608dfbed2b0156`.
+
 ## 2026-05-17 - restore-core-tools
 
 - Commit: `44adc0a9d7dcda0c599801d91d0d88a86263821a`
