@@ -20,6 +20,7 @@ jobs:
           node .github/scripts/codex-deep-whitepaper-remove-thesis.js
           node .github/scripts/codex-whitepaper-inst-ratio.js
           node .github/scripts/codex-fix-csv-import.js
+          node .github/scripts/codex-syntax-rescue.js
       - name: Commit patched index
         run: |
           if git diff --quiet; then
@@ -29,5 +30,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Fix robust CSV import"
+          git commit -m "Restore page JavaScript functionality"
           git push
