@@ -1,0 +1,48 @@
+name: Codex thicken 3D donut chart
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add real 3D depth to donut chart
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'index.html';
+          let t = fs.readFileSync(path, 'utf8');
+
+          const overrides = `.piewrap{min-height:570px;perspective:900px}.piewrap:before{top:128px;width:min(430px,96%);border-width:3px;box-shadow:0 0 38px rgba(26,158,255,.82),inset 0 0 26px rgba(22,165,255,.34)}.piewrap:after{content:"";position:absolute;left:50%;top:285px;width:min(390px,90%);height:86px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(0,132,255,.45),rgba(0,52,130,.26) 48%,transparent 74%);filter:blur(1px);box-shadow:0 0 36px rgba(0,149,255,.72);pointer-events:none}.pie{width:min(370px,92%);margin:58px auto 4px;transform:rotateX(54deg) translateY(-2px);transform-style:preserve-3d;overflow:visible;box-shadow:inset 0 0 0 5px rgba(172,236,255,.98),inset 0 0 0 78px #061530,0 0 0 9px rgba(25,139,255,.18),0 0 44px rgba(43,157,255,.95),0 52px 48px rgba(0,0,0,.56)}.pie:before{content:"";position:absolute;inset:0;border-radius:50%;background:inherit;transform:translateY(34px) translateZ(-42px);filter:brightness(.55) saturate(1.25);box-shadow:inset 0 0 0 5px rgba(90,190,255,.72),inset 0 0 0 78px #020a18,0 0 24px rgba(0,119,255,.55);-webkit-mask:radial-gradient(circle,transparent 0 29%,#000 30% 100%);mask:radial-gradient(circle,transparent 0 29%,#000 30% 100%);z-index:-1}.pie:after{content:"";position:absolute;inset:30%;border-radius:50%;background:radial-gradient(circle at 45% 28%,#102f62,#020711 72%);box-shadow:inset 0 14px 28px rgba(0,0,0,.92),0 -4px 16px rgba(172,236,255,.72),0 0 30px rgba(37,162,255,.76);z-index:3}.legend{margin-top:34px}`;
+
+          if (!t.includes('/* codex-thick-donut-20260517 */')) {
+            const anchor = '/* codex-hud-fit-20260517 */';
+            if (!t.includes(anchor)) throw new Error('HUD fit CSS anchor not found');
+            t = t.replace(anchor, `/* codex-thick-donut-20260517 */${overrides}${anchor}`);
+          }
+
+          const logPath = 'VERSION_LOG.md';
+          const entry = `## 2026-05-17 - thicker-3d-donut-pie\n- Fixed: 持股占比圓餅圖 now has a thicker 3D donut body with a lower extrusion layer, stronger center-hole shadow, and glowing base.\n- Preserved: CSV import behavior, manual 方舟複盤 generation, 3D holdings building chart, target-price tools, and 10-section review output.\n\n`;
+          fs.writeFileSync(path, t);
+          let log = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
+          if (!log.includes('thicker-3d-donut-pie')) fs.writeFileSync(logPath, entry + log);
+          NODE
+      - name: Commit thick donut patch
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Make holdings pie chart more three-dimensional"
+          git push
