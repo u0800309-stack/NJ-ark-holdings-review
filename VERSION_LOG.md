@@ -1,3 +1,7 @@
+## 2026-05-17 - tech-review-focus-brief
+- Changed: 匯入 CSV 後的「複盤重點整理」改為科技感重點卡，並加入「下複盤後的總結論」。
+- Preserved: manual 方舟複盤 generation, normal pie chart, 3D holdings building chart, institutional flow feature, target-price tools, and 10-section review output.
+
 ## 2026-05-17 - institutional-flow-and-chip-metrics
 - Added: 智慧工具新增「機構資金與籌碼流向」功能，包含近期機構淨流向、總機構持股比例、買賣力道分布。
 - Behavior: 匯入持股或生成方舟複盤後會自動依持股水位、集中度、損益動能與需檢討檔數估算。
