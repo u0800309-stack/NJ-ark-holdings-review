@@ -1,5 +1,15 @@
 # Version Log
 
+## 2026-05-17 - restored-charts-and-latest-targets
+
+- Commit: `9b968572fa39f837e63a2f8416222015cc029f0e`
+- Scope: Restore `方舟複盤`, `持股明細`, `智慧工具` with the missing visual structure and latest target-price collection.
+- Fixed: CSV import for broker columns including `代號`, `股票名稱`, `最新價`, `目前庫存`, `均價`, `可用庫存`, `庫存成本`, `現值`, `含息報酬率`.
+- Restored: holdings pie chart and `重大持股 3D 結構圖` inside `持股明細`.
+- Fixed: `蒐集並分析` now clears stale target data and fetches latest public StockAnalysis analyst ratings each time.
+- Verified: sample CSV imports, 10 review sections render, holdings charts render, and GEV target collection returns current public target rows.
+- Recovery note: to restore this version later, reset `main/index.html` to commit `9b968572fa39f837e63a2f8416222015cc029f0e`.
+
 ## 2026-05-17 - full-smart-tools-before-history-review
 
 - Commit: `c3655d680578ca32c432eb4cb8ebec57ca486e3c`
