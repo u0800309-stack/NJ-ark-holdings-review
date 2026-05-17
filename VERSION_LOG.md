@@ -1,3 +1,7 @@
+## 2026-05-17 - donut-reference-mode
+- Fixed: 持股占比圓餅圖 adjusted toward the provided reference mode: fuller top surface, visible lower extrusion, stronger slice glow, deeper center hole, and blue sci-fi base ring.
+- Preserved: CSV import behavior, manual 方舟複盤 generation, 3D holdings building chart, target-price tools, and 10-section review output.
+
 ## 2026-05-17 - thicker-3d-donut-pie
 - Fixed: 持股占比圓餅圖 now has a thicker 3D donut body with a lower extrusion layer, stronger center-hole shadow, and glowing base.
 - Preserved: CSV import behavior, manual 方舟複盤 generation, 3D holdings building chart, target-price tools, and 10-section review output.
