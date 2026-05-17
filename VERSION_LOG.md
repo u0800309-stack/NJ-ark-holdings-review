@@ -1,3 +1,8 @@
+## 2026-05-17 - precise-hud-fit-and-3d-donut
+- Fixed: 重大持股 3D 結構圖 now scales the whole city stage inside the card instead of overflowing.
+- Fixed: 持股占比圓餅圖 now uses a tilted, thicker neon 3D donut treatment closer to the reference.
+- Preserved: CSV import behavior, manual 方舟複盤 generation, target-price tools, and 10-section review output.
+
 ## 2026-05-17 - direct-reference-hud-visual-match
 - Scope: Pushed 持股占比圓餅圖 and 重大持股 3D 結構圖 closer to the provided dark-blue neon HUD reference.
 - Details: Added angular HUD frames, title glow bars, stronger 3D donut depth, neon legend rows, city-grid background, building badges, glowing bases, and sharper tower labels.
