@@ -1,3 +1,8 @@
+## 2026-05-17 - weighted-institution-ownership-by-holdings
+- Changed: 機構資金與籌碼流向的「總機構持股比例」改為依持股明細逐檔估算後，再按部位占比加權。
+- Added: 說明文字列出前幾大持股的機構持股估算，讓結果能對應使用者實際持股。
+- Preserved: CSV import behavior, normal pie chart, 3D holdings building chart, target-price tools, and 10-section review output.
+
 ## 2026-05-17 - tech-review-focus-brief
 - Changed: 匯入 CSV 後的「複盤重點整理」改為科技感重點卡，並加入「下複盤後的總結論」。
 - Preserved: manual 方舟複盤 generation, normal pie chart, 3D holdings building chart, institutional flow feature, target-price tools, and 10-section review output.
