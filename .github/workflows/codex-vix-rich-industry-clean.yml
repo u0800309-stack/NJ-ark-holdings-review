@@ -1,0 +1,120 @@
+name: Codex VIX rich review industry clean
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch index cleanly
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          css = """
+/* codex-vix-rich-industry-clean-20260517 */
+[hidden]{display:none!important}
+.vix-ticker{min-height:38px;display:grid;grid-template-columns:auto auto;align-items:center;column-gap:8px;padding:6px 12px;border:1px solid rgba(215,169,62,.75);border-radius:8px;background:linear-gradient(135deg,#071b34,#031026);color:#f8f2d8;font-weight:900}
+.vix-ticker span{font-size:12px;color:#d7a93e;letter-spacing:.08em}.vix-ticker strong{font-size:18px;line-height:1;color:#fff;text-shadow:0 0 10px rgba(70,160,255,.75)}.vix-ticker small{grid-column:1/3;color:#9db3c8;font-size:11px;font-weight:700}.vix-ticker.hot{border-color:#ff7f8c}.vix-ticker.calm{border-color:#45e0c3}
+.industry-btn{min-height:30px;padding:0 10px;border:1px solid rgba(36,151,255,.45);border-radius:8px;background:linear-gradient(180deg,#0b315d,#051934);color:#eaf6ff;font-weight:900;white-space:nowrap}
+.industry-note{min-width:320px;max-width:540px;line-height:1.65;color:#26343a}.industry-note strong{display:block;margin:8px 0;color:#0d2e4d}.industry-note ol{margin:0;padding-left:18px}.industry-note li{margin:0 0 8px}
+.rich-line{line-height:1.82;color:#2f4148}.rich-line strong{color:#0b1a2d;font-weight:950}.review .summary,.review .section{box-shadow:0 10px 24px rgba(25,42,48,.08)}
+/* codex-final-normal-pie-clean-20260517 */
+.piewrap{min-height:auto!important;perspective:none!important;align-content:center!important;gap:18px!important}.piewrap:before,.piewrap:after{display:none!important}.pie{width:min(320px,88%)!important;margin:10px auto 8px!important;transform:none!important;aspect-ratio:1!important;border-radius:50%!important;box-shadow:0 0 0 4px rgba(215,169,62,.36),0 18px 36px rgba(0,0,0,.36)!important;filter:none!important;overflow:hidden!important}.pie:before,.pie:after{display:none!important}
+@media(max-width:640px){.vix-ticker{width:100%;justify-content:center}.industry-note{min-width:240px}}
+"""
+          if 'codex-vix-rich-industry-clean-20260517' not in s:
+              s = s.replace('</style>', css + '</style>')
+
+          vix = '<div class="vix-ticker" id="vixTicker"><span>VIX</span><strong id="vixValue">--</strong><small id="vixTime">按複盤更新</small></div>'
+          if 'id="vixTicker"' not in s:
+              s = s.replace('<button class="btn" id="loadSample">載入範例</button>', '<button class="btn" id="loadSample">載入範例</button>' + vix)
+
+          if 'lastVix:null' not in s:
+              s = s.replace('const state={rows:[],analyzed:[],lastTotals:null,lastSummary:null};',
+                            'const state={rows:[],analyzed:[],lastTotals:null,lastSummary:null,lastVix:null,industryPapers:{}};')
+
+          if '<th>產業分析</th>' not in s:
+              s = s.replace('<th>持有邏輯</th></tr></thead><tbody id="tableBody"><tr><td colspan="13">尚無資料</td></tr>',
+                            '<th>持有邏輯</th><th>產業分析</th></tr></thead><tbody id="tableBody"><tr><td colspan="14">尚無資料</td></tr>')
+
+          table_fn = r'''function table(){els.tableBody.innerHTML=state.analyzed.map((r,i)=>{
+const paper=state.industryPapers[r.symbol]||"";
+return `<tr><td><span class="badge ${r.tone}">${esc(r.status)}</span></td><td>${esc(r.symbol)}</td><td>${esc(r.name)}</td><td>${esc(r.sector)}</td><td class="num">${num(r.shares)}</td><td class="num">${num(r.avgCost,2)}</td><td class="num">${num(r.price,2)}</td><td class="num">${money(r.value)}</td><td class="num">${pct(r.weight)}</td><td class="num">${money(r.pnl)}</td><td class="num">${pct(r.pnlPct)}</td><td>${esc(r.level)}</td><td>${esc(r.thesis)}</td><td><button class="industry-btn" onclick="analyzeIndustry(${i})">分析產業</button>${paper?`<div class="industry-note">${paper}</div>`:""}</td></tr>`
+}).join("")}'''
+          if 'onclick="analyzeIndustry' not in s:
+              s = re.sub(r'function table\(\)\{.*?\}function visuals\(\)', table_fn + 'function visuals()', s, 1, flags=re.S)
+          s = s.replace('colspan="13">尚無資料', 'colspan="14">尚無資料')
+          s = s.replace("els.tableBody.innerHTML='<tr><td colspan=\"13\">尚無資料</td></tr>';", "els.tableBody.innerHTML='<tr><td colspan=\"14\">尚無資料</td></tr>';")
+
+          js = r'''
+async function fetchVixOnce(){
+ const box=document.querySelector("#vixTicker"),val=document.querySelector("#vixValue"),time=document.querySelector("#vixTime");
+ if(!box||!val||!time)return null;time.textContent="更新中";
+ try{
+  const url="https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?range=1d&interval=1m&corsDomain=finance.yahoo.com&_="+Date.now();
+  const res=await fetch(url,{cache:"no-store"});const data=await res.json();
+  const result=data.chart&&data.chart.result&&data.chart.result[0];
+  const closes=(result&&result.indicators&&result.indicators.quote&&result.indicators.quote[0]&&result.indicators.quote[0].close)||[];
+  const last=[...closes].reverse().find(x=>Number.isFinite(Number(x)));
+  const v=Number((result&&result.meta&&result.meta.regularMarketPrice)||last);
+  if(!Number.isFinite(v))throw new Error("vix unavailable");
+  state.lastVix={value:v,time:new Date()};val.textContent=v.toFixed(2);time.textContent="生成時更新";
+  box.classList.toggle("hot",v>=25);box.classList.toggle("calm",v<18);return state.lastVix;
+ }catch(e){state.lastVix=null;val.textContent="--";time.textContent="暫無資料";return null}
+}
+function vixText(){return state.lastVix?`VIX ${num(state.lastVix.value,2)}（本次生成方舟複盤時抓取）`:"VIX 本次未取得最新資料，仍以持股結構與風控數據先做判斷"}
+function richBlock(lead,detail,action){return `<p class="rich-line"><strong>${esc(lead)}</strong><br>${esc(detail)}<br><strong>操作重點：</strong>${esc(action)}</p>`}
+review=function(s,t){
+ els.emptyState.hidden=true;els.reviewOutput.hidden=false;
+ const market=els.marketContext.value.trim()||"尚未輸入大盤脈絡，本次先以持股水位、集中度、損益結構、位階與 VIX 作為複盤基礎。";
+ const top=state.analyzed.slice(0,5).map(r=>`${r.name} ${pct(r.weight)}`).join("、")||"尚無資料";
+ const sector=s.sectors.map(([n,w])=>`${n} ${pct(w)}`).join("、")||"尚無資料";
+ const watch=(s.watch.length?s.watch:state.analyzed).slice(0,6).map(r=>`${r.name}：${r.status}，占比 ${pct(r.weight)}，損益率 ${pct(r.pnlPct)}，位階 ${r.level}`).join("；")||"尚無需要優先檢討的標的";
+ const final=conclusion(s),largest=s.largest?`${s.largest.name} ${pct(s.largest.weight)}`:"尚無";
+ const secs=[
+ ["總結判斷","#183c4a",richBlock(`本次核心結論：${final}`,`股票水位 ${pct(s.stockRatio)}，未實現損益 ${money(s.totalPnl)}，整體報酬率約 ${pct(s.totalPnlPct)}；最大部位為 ${largest}，需檢討檔數 ${s.watch.length}。${vixText()}。`,`先確認單一部位過大、高位階追價、虧損但邏輯不清三種問題，再決定減碼、續抱或換股。`)],
+ ["資產配置與水位","#147a78",richBlock("股票水位決定攻守，不只看賺賠。",`持股市值 ${money(t.stock)}，現金 ${money(t.cash)}，總資產 ${money(t.total)}。目前水位屬於「${s.water}」，代表加碼空間、容錯率與回檔承受力都要一起看。`,`若水位偏高，先用減碼或換股提高安全邊際；若水位偏低，等強勢股回測支撐再分批補回。`)],
+ ["集中度檢查","#456aa8",richBlock("集中度是複盤的第一個風險開關。",`前五大部位為 ${top}。單一持股超限名單：${names(s.con,"目前未超過設定上限")}。集中度高時，即使標的基本面好，也會放大淨值波動。`,`核心持股可以保留，但過大的部位要設定分批調節區間，避免單一事件拖累整體組合。`)],
+ ["產業與市場配置","#456aa8",richBlock("產業分布要看是否同題材重押。",`目前市場/產業分布：${sector}。若多檔都連動同一條 AI、半導體或景氣循環主線，表面分散，實際風險仍可能高度集中。`,`把同產業標的放在一起比較，優先留下競爭優勢強、毛利結構穩、現金流清楚的公司。`)],
+ ["個股優先順序","#147a78",richBlock("先處理會拖累效率的部位。",watch,`優先檢查高位階大漲後占比過高、虧損卻沒有明確反轉條件、以及同產業中相對弱勢的標的。`)],
+ ["大盤與 VIX 脈絡","#d7a93e",richBlock("複盤不能只看庫存，要放回市場風險溫度。",`${market}；${vixText()}。VIX 偏高時，高 beta 標的波動會放大；VIX 偏低時，仍要注意過度樂觀造成追價風險。`,`產生複盤時同步看 VIX；若 VIX 快速升高，先降低高 beta 與高位階部位風險。`)],
+ ["資金效率","#456aa8",richBlock("每一筆資金都要有更好的去處。",`需檢討檔數 ${s.watch.length}，弱勢標的 ${s.weak.length}，高位階標的 ${s.high.length}。資金效率差通常不是單日漲跌，而是持有理由、價格位階與替代標的比較後不再划算。`,`把資金從低效率部位轉到邏輯清楚、趨勢仍在、估值空間更合理的標的。`)],
+ ["風控與情境壓力","#bd4f48",richBlock("先假設市場不配合，再檢查組合能不能承受。",risk(s),`每次加碼前先問：若大盤回檔 10% 到 15%，這個部位是否仍能承受；若答案不確定，就先降部位。`)],
+ ["目標價與估值","#d7a93e",richBlock("目標價不是答案，是檢查風險報酬的工具。",`智慧工具可用「蒐集並分析」抓最新公開機構目標價，並以低標、最可能目標價、高標、評等與日期新鮮度做交叉判斷。`,`若現價接近高標且部位已大，偏向保護獲利；若接近低標但基本面未壞，才考慮分批承接。`)],
+ ["執行計畫","#437f53",richBlock("複盤後要能落到下一步。",`第一步確認超限與高位階部位；第二步比較同產業替代標的；第三步寫清保留、減碼、觀察理由；第四步下次複盤只檢查條件是否改變。`,`維持核心、清掉低效率、保留現金彈性，等市場給出更好的風險報酬再加碼。`)]];
+ els.reviewOutput.innerHTML=`<section class="summary"><h3>下複盤後的總結論</h3><p><strong>${esc(final)}</strong><br><br><strong>目前關鍵數字：</strong>股票水位 ${pct(s.stockRatio)}，最大部位 ${esc(largest)}，未實現損益 ${money(s.totalPnl)}，需檢討檔數 ${s.watch.length}。<br><strong>市場風險溫度：</strong>${esc(vixText())}。</p></section>`+secs.map((x,i)=>`<section class="section" style="--tone:${x[1]}"><b>${i+1}</b><article><h3>${esc(x[0])}</h3>${x[2]}</article></section>`).join("")
+}
+function industryWhitepaper(r){
+ const sector=r.sector||"所屬產業";
+ const trend=/半導體|AI|電子|TECH|SEMICONDUCTOR/i.test(sector+" "+r.name)?"技術節點、AI 算力投資與資本支出循環是中期主軸":"需求週期、價格紀律與現金流品質是中期主軸";
+ return `<strong>《產業策略白皮書》${esc(r.symbol)} ${esc(r.name)}</strong><ol><li><b>基本面分析：</b>${esc(r.name)} 的核心商業模式需從收入來源、客戶集中度與產品差異化檢視；目前部位占比 ${pct(r.weight)}，應確認其競爭優勢是否足以維持市場定價權。</li><li><b>財報解讀：</b>近三年重點看營收成長是否連續、毛利率是否守穩、營業現金流是否跟上獲利，以及負債結構是否因擴產或景氣下行而惡化。</li><li><b>產業趨勢：</b>${esc(trend)}；同時追蹤政策補貼、供應鏈在地化、利率環境與終端需求變化，判斷總潛在市場是否仍在擴張。</li><li><b>未來潛力：</b>若公司仍處於成長週期，產品線延展、客戶滲透率與規模經濟會提高估值彈性；若已進入成熟期，重點轉向現金流、股東回報與成本控制。</li><li><b>策略風險與挑戰：</b>主要風險包括需求放緩、價格競爭、技術替代、匯率與政策變數。建議以目標價區間、單一持股上限與停損/減碼條件做壓力測試。</li></ol>`
+}
+function analyzeIndustry(i){const r=state.analyzed[i];if(!r)return;state.industryPapers[r.symbol]=industryWhitepaper(r);table();toast(`${r.symbol} 產業策略白皮書已生成。`)}
+'''
+          if 'fetchVixOnce' not in s:
+              s = s.replace('document.querySelectorAll(".tab").forEach', js + 'document.querySelectorAll(".tab").forEach')
+          s = s.replace('els.runReview.onclick=generate;', 'els.runReview.onclick=async()=>{await fetchVixOnce();generate();};')
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit clean patch
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Add VIX rich review and industry analysis"
+          git push
