@@ -1,0 +1,44 @@
+name: Codex weighted institution flow
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch weighted institution ownership
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'index.html';
+          let t = fs.readFileSync(path, 'utf8');
+          const oldFn = `function flowMetrics(s,t){if(!els.flowNet)return;const bullish=state.analyzed.filter(r=>r.pnlPct>0&&!r.isHigh).length,weak=s.weak.length,con=s.con.length,total=Math.max(state.analyzed.length,1),buy=Math.max(15,Math.min(85,Math.round(50+(bullish-weak)*9-con*5+(s.stockRatio>.55?8:-4))));const sell=100-buy,ownership=Math.max(28,Math.min(88,Math.round((52+s.stockRatio*28+(s.largest?s.largest.weight*22:0)-weak*3)*10)/10));const netUsd=(t.stock/32/100000000)*(buy-sell)/100*2.2;els.flowNet.textContent=(netUsd>=0?'+':'')+num(netUsd,1)+' 億美元';els.flowNetCard.classList.toggle('positive',netUsd>=0);els.flowNetCard.classList.toggle('negative',netUsd<0);els.flowOwnership.textContent=num(ownership,1)+'%';els.flowBuyBar.style.width=buy+'%';els.flowBuy.textContent='買進 '+buy+'%';els.flowSell.textContent='賣出 '+sell+'%';els.flowNote.textContent='估算依據：持股水位 '+pct(s.stockRatio)+'、最大部位 '+(s.largest?pct(s.largest.weight):'0%')+'、需檢討檔數 '+s.watch.length+'。'}`;
+          const newFn = `function estimateInstitutionOwnership(r){const text=(r.symbol+' '+r.name+' '+r.sector).toUpperCase();let base=52;if(/GEV|AAPL|MSFT|NVDA|AMAT|ASML|TSM|TSMC|GOOG|GOOGL|META|AVGO/.test(text))base=68;if(/TSLA|PLTR|COIN|MSTR|ARK|CRYPTO/.test(text))base=42;if(/2330|台積|台灣|TAIWAN/.test(text))base=62;if(/ETF|QQQ|SPY|VOO|SMH|SOXX/.test(text))base=78;if(/半導體|SEMICONDUCTOR|AI|TECH|科技|電子/.test(text))base+=5;if(r.weight>.15)base+=4;if(r.pnlPct>0.08)base+=3;if(r.isWeak)base-=6;if(r.isHigh)base-=3;return Math.max(18,Math.min(88,base))}function flowMetrics(s,t){if(!els.flowNet)return;const rows=state.analyzed||[],totalWeight=rows.reduce((sum,r)=>sum+r.weight,0)||1;const weightedOwnership=rows.reduce((sum,r)=>sum+estimateInstitutionOwnership(r)*r.weight,0)/totalWeight;const bullish=rows.filter(r=>r.pnlPct>0&&!r.isHigh).length,weak=s.weak.length,con=s.con.length;const topOwners=rows.slice(0,5).map(r=>r.symbol+' '+num(estimateInstitutionOwnership(r),0)+'%').join('、');const buy=Math.max(15,Math.min(85,Math.round(42+weightedOwnership*.45+(bullish-weak)*4-con*3)));const sell=100-buy;const netUsd=(t.stock/32/100000000)*(buy-sell)/100*2.2;els.flowNet.textContent=(netUsd>=0?'+':'')+num(netUsd,1)+' 億美元';els.flowNetCard.classList.toggle('positive',netUsd>=0);els.flowNetCard.classList.toggle('negative',netUsd<0);els.flowOwnership.textContent=num(weightedOwnership,1)+'%';els.flowBuyBar.style.width=buy+'%';els.flowBuy.textContent='買進 '+buy+'%';els.flowSell.textContent='賣出 '+sell+'%';els.flowNote.textContent='依你的持股逐檔加權估算：'+(topOwners||'尚無持股')+'。總機構持股比例會隨持股明細、部位占比與損益狀態變動。'}`;
+          if (!t.includes('estimateInstitutionOwnership(r)')) {
+            if (!t.includes(oldFn)) throw new Error('flowMetrics anchor not found');
+            t = t.replace(oldFn, newFn);
+          }
+          const logPath = 'VERSION_LOG.md';
+          const entry = `## 2026-05-17 - weighted-institution-ownership-by-holdings\n- Changed: 機構資金與籌碼流向的「總機構持股比例」改為依持股明細逐檔估算後，再按部位占比加權。\n- Added: 說明文字列出前幾大持股的機構持股估算，讓結果能對應使用者實際持股。\n- Preserved: CSV import behavior, normal pie chart, 3D holdings building chart, target-price tools, and 10-section review output.\n\n`;
+          let log = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
+          if (!log.includes('weighted-institution-ownership-by-holdings')) fs.writeFileSync(logPath, entry + log);
+          fs.writeFileSync(path, t);
+          NODE
+      - name: Commit weighted institution flow
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Weight institution ownership by actual holdings"
+          git push
