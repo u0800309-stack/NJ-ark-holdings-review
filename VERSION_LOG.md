@@ -1,3 +1,8 @@
+## 2026-05-17 - smart-layout-rotating-building-3d
+- Scope: Fixed the 智慧工具 layout so target-price tables no longer squeeze the Q&A card.
+- Scope: Reworked 重大持股 3D 結構圖 into an animated rotating building-style city model.
+- Preserved: CSV import, 方舟複盤 10 sections, 持股明細 pie chart, 智慧工具 target-price collection and analysis.
+
 # Version Log
 
 ## 2026-05-17 - restored-charts-and-latest-targets
