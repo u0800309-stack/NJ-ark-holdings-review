@@ -1,0 +1,69 @@
+name: Codex force VIX industry patch
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Force patch VIX and industry analysis
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          t=p.read_text(encoding='utf-8')
+          css='.vix-ticker{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;align-items:center;column-gap:8px;min-height:42px;border:1px solid rgba(215,169,62,.55);border-radius:8px;background:linear-gradient(180deg,#071526,#030912);color:#f8f3df;padding:6px 12px;box-shadow:0 0 18px rgba(215,169,62,.22),inset 0 0 18px rgba(215,169,62,.08)}.vix-ticker span{font-size:11px;color:#d7a93e;font-weight:950}.vix-ticker strong{font-size:20px;line-height:1;color:#fff}.vix-ticker small{grid-column:1/3;color:#8ea0ad;font-size:11px}.vix-ticker.hot strong{color:#ef4444}.vix-ticker.calm strong{color:#10b981}.industry-btn{min-height:32px;padding:0 10px}.analysis-row td{background:#f8faf6}.whitepaper{border:1px solid rgba(24,60,74,.22);border-left:5px solid var(--navy);border-radius:8px;background:#fff;padding:16px;white-space:pre-line;line-height:1.75;color:#26363d}.whitepaper strong{display:block;margin-bottom:10px;color:#10242d;font-size:18px}.whitepaper .meta{display:block;margin-bottom:10px;color:var(--muted);font-size:13px}.visuals{grid-template-columns:minmax(360px,.9fr) minmax(520px,1.1fr);gap:16px}.pie-card,.structure-card{border-color:rgba(215,169,62,.55);background:radial-gradient(circle at 30% 0,rgba(215,169,62,.16),transparent 34%),linear-gradient(180deg,#07111e,#020812);box-shadow:0 0 0 1px rgba(215,169,62,.22),0 18px 42px rgba(0,0,0,.36),inset 0 0 34px rgba(215,169,62,.08)}.pie-card h3,.structure-card h3{color:#f2c66d;text-shadow:0 0 14px rgba(215,169,62,.58)}.pie-card h3:before,.structure-card h3:before{background:#d7a93e;box-shadow:0 0 18px #d7a93e}.lrow{border-color:rgba(215,169,62,.2);background:linear-gradient(90deg,rgba(215,169,62,.12),rgba(3,18,35,.64))}.lrow strong{color:#f2c66d;text-shadow:0 0 12px rgba(215,169,62,.35)}.s3d{background:radial-gradient(circle at 46% 30%,rgba(215,169,62,.13),transparent 38%),linear-gradient(135deg,rgba(215,169,62,.13) 0 1px,transparent 1px),linear-gradient(45deg,rgba(60,132,220,.1) 0 1px,transparent 1px),linear-gradient(180deg,#07111e,#020812 70%);background-size:auto,58px 58px,58px 58px,auto}.tower:before,.tower span{border-color:rgba(215,169,62,.72);box-shadow:0 0 18px var(--c),0 0 14px rgba(215,169,62,.3)}'
+          if 'codex-force-vix-industry-20260517' not in t:
+              a='/* codex-tech-review-brief-20260517 */'
+              if a not in t: raise SystemExit('css anchor missing')
+              t=t.replace(a,'/* codex-force-vix-industry-20260517 */'+css+a)
+          if 'id="vixValue"' not in t:
+              t=t.replace('<div class="actions"><button class="btn" id="loadSample">','<div class="actions"><div class="vix-ticker" id="vixTicker"><span>VIX</span><strong id="vixValue">--</strong><small id="vixTime">更新中</small></div><button class="btn" id="loadSample">')
+          t=t.replace('const state={rows:[],analyzed:[],lastTotals:null,lastSummary:null};','const state={rows:[],analyzed:[],lastTotals:null,lastSummary:null,industryReports:{}};')
+          t=t.replace('speakReview:$("#speakReview")}','speakReview:$("#speakReview"),vixTicker:$("#vixTicker"),vixValue:$("#vixValue"),vixTime:$("#vixTime")}')
+          t=t.replace('<th>位階</th><th>持有邏輯</th></tr>','<th>位階</th><th>持有邏輯</th><th>產業分析</th></tr>')
+          t=t.replace('<tr><td colspan="13">尚無資料</td></tr>','<tr><td colspan="14">尚無資料</td></tr>')
+          t=t.replace('colspan="13">尚無資料','colspan="14">尚無資料')
+          table='function table(){els.tableBody.innerHTML=state.analyzed.map(r=>`<tr><td><span class="badge ${r.tone}">${esc(r.status)}</span></td><td>${esc(r.symbol)}</td><td>${esc(r.name)}</td><td>${esc(r.sector)}</td><td class="num">${num(r.shares)}</td><td class="num">${num(r.avgCost,2)}</td><td class="num">${num(r.price,2)}</td><td class="num">${money(r.value)}</td><td class="num">${pct(r.weight)}</td><td class="num">${money(r.pnl)}</td><td class="num">${pct(r.pnlPct)}</td><td>${esc(r.level)}</td><td>${esc(r.thesis)}</td><td><button class="btn industry-btn" data-symbol="${esc(r.symbol)}" type="button">分析產業</button></td></tr>${state.industryReports[r.symbol]?`<tr class="analysis-row"><td colspan="14"><div class="whitepaper"><strong>《產業策略白皮書》${esc(r.name)}（${esc(r.symbol)}）</strong><span class="meta">依目前持股資料、產業欄位與部位狀態產生。實際投資前仍應搭配最新財報、法說會與公開申報資料校準。</span>${esc(state.industryReports[r.symbol])}</div></td></tr>`:""}`).join("")}'
+          if 'industry-btn' not in t:
+              t,n=re.subn(r'function table\(\)\{els\.tableBody\.innerHTML=state\.analyzed\.map\(r=>`<tr>[\s\S]*?</tr>`\)\.join\(""\)\}',table,t,count=1)
+              if n!=1: raise SystemExit('table replace failed')
+          funcs='''function industryWhitepaper(r){const cycle=r.isWeak?'處於修正與驗證期':r.isHigh?'處於高位階收斂期':'處於觀察與延展期';const pricing=r.pnlPct>0?'市場目前給予較正向的定價反應':'市場定價仍偏保守，需確認營運改善是否具延續性';return `1. 基本面分析：${r.name} 的核心商業模式可先從「${r.sector}」產業定位切入，重點觀察其產品或服務是否具備規模化、客戶黏著度與差異化能力。若企業能在關鍵供應鏈、技術規格、通路或品牌信任上形成門檻，通常較能維持市場定價權；目前持股狀態為「${r.status}」，代表需要把基本面強度與股價位階一起評估。\n\n2. 財報解讀：近三年營收應觀察成長是否由單一景氣循環帶動，或來自產品組合升級與市占率提升；毛利率可用來判斷定價權與成本壓力，營業現金流則驗證獲利品質。負債結構方面，若短債比重上升或自由現金流轉弱，會降低景氣下行時的防禦能力；若現金流穩定且資本支出具效率，則有助支撐中長期投資。\n\n3. 產業趨勢：${r.sector} 的總潛在市場空間需從需求成長、技術替代、政策環境與客戶資本支出週期判斷。中長期需求若來自結構性趨勢，企業評價通常可維持較高韌性；若主要依賴短期庫存回補或單一題材，則需提高情境壓力測試。\n\n4. 未來潛力：${r.name} 目前可視為${cycle}。產品線若能從既有優勢延伸到更高毛利、更高黏著度或更大市場空間的領域，未來潛力會提高；反之，若成長主要依賴單一產品或單一客戶，則需要折價看待。${pricing}。\n\n5. 策略風險與挑戰：主要風險包括需求放緩、價格競爭、技術路線更替、供應鏈成本、政策限制與估值壓縮。具體應對上，若部位占比已達 ${pct(r.weight)}，應設定財報驗證點、位階停利條件與基本面轉弱的減碼規則；若未來營收、毛利率或現金流連續轉弱，應優先降低部位而非被動等待股價反彈。`}function analyzeIndustry(symbol){if(!state.analyzed.length&&state.rows.length)analyze();const r=state.analyzed.find(x=>x.symbol===symbol);if(!r)return;state.industryReports[symbol]=industryWhitepaper(r);table();toast(`${r.symbol} 產業策略白皮書已產生。`)}async function updateVix(){if(!els.vixValue)return;try{const res=await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?range=1d&interval=1m&corsDomain=finance.yahoo.com',{cache:'no-store'});const data=await res.json();const result=data.chart?.result?.[0];const meta=result?.meta||{};const closes=result?.indicators?.quote?.[0]?.close||[];const last=[...closes].reverse().find(x=>Number.isFinite(x));const v=Number(meta.regularMarketPrice||last);if(!Number.isFinite(v))throw new Error('no vix');els.vixValue.textContent=v.toFixed(2);els.vixTime.textContent='每分鐘更新';els.vixTicker.classList.toggle('hot',v>=25);els.vixTicker.classList.toggle('calm',v<18)}catch(e){els.vixTime.textContent='暫無資料'}}'''
+          if 'function updateVix()' not in t:
+              t=t.replace('function flowMetrics(s,t){',funcs+'function flowMetrics(s,t){')
+          if 'closest(".industry-btn")' not in t:
+              t=t.replace('els.loadSample.onclick=()=>loadCsv(sampleCsv);','document.addEventListener("click",e=>{const b=e.target.closest(".industry-btn");if(b)analyzeIndustry(b.dataset.symbol)});els.loadSample.onclick=()=>loadCsv(sampleCsv);')
+          if 'setInterval(updateVix,60000)' not in t:
+              t=t.replace('els.speakReview.onclick=speak;','els.speakReview.onclick=speak;updateVix();setInterval(updateVix,60000);')
+          p.write_text(t,encoding='utf-8')
+          log=Path('VERSION_LOG.md')
+          entry='''## 2026-05-17 - forced-vix-gold-industry-analysis
+- Added: Header VIX index widget that refreshes every minute.
+- Changed: 持股占比圖與重大持股 3D 結構圖改為深色金色科技風格。
+- Added: 持股明細每檔新增「分析產業」按鈕與《產業策略白皮書》欄位。
+- Preserved: CSV import behavior, normal pie chart, institutional flow feature, target-price tools, and 10-section review output.
+
+'''
+          old=log.read_text(encoding='utf-8') if log.exists() else ''
+          if 'forced-vix-gold-industry-analysis' not in old:
+              log.write_text(entry+old,encoding='utf-8')
+          PY
+      - name: Commit forced patch
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Force VIX gold visuals and industry analysis"
+          git push
