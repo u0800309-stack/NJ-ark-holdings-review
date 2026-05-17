@@ -1,0 +1,55 @@
+name: Codex tech review brief
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restyle pre-review focus brief
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'index.html';
+          let t = fs.readFileSync(path, 'utf8');
+
+          const css = `.review-brief{position:relative;display:grid;gap:14px;padding:18px;border:1px solid rgba(36,151,255,.58);border-left:6px solid #1aa6ff;border-radius:10px;background:radial-gradient(circle at 18% 0,rgba(33,150,255,.18),transparent 32%),linear-gradient(180deg,#061b3c,#031226);box-shadow:0 0 24px rgba(18,127,255,.28),inset 0 0 28px rgba(31,126,255,.16);color:#f3f8ff}.review-brief:before{content:"";position:absolute;inset:9px;border:1px solid rgba(61,170,255,.24);border-radius:8px;pointer-events:none}.review-brief h3{margin:0;color:#fff;font-size:24px;text-shadow:0 0 16px rgba(77,178,255,.9)}.review-brief h3:after{content:"";display:block;width:112px;height:4px;margin-top:10px;border-radius:999px;background:#14a8ff;box-shadow:0 0 18px #14a8ff}.brief-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.brief-card{border:1px solid rgba(78,169,255,.34);border-radius:8px;background:linear-gradient(180deg,rgba(22,94,190,.28),rgba(5,22,52,.72));padding:12px;box-shadow:inset 0 0 18px rgba(31,124,255,.12)}.brief-card span{display:block;color:#9ecbff;font-size:12px}.brief-card strong{display:block;margin-top:7px;color:#fff;font-size:24px;text-shadow:0 0 12px rgba(84,184,255,.68)}.brief-conclusion{border:1px solid rgba(56,193,255,.42);border-radius:8px;background:rgba(4,18,43,.72);padding:16px;line-height:1.75}.brief-conclusion strong{display:block;margin-bottom:8px;color:#fff;font-size:20px;text-shadow:0 0 14px rgba(84,184,255,.7)}.brief-note{margin:0;color:#bcd4ef;line-height:1.65}@media(max-width:760px){.brief-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}`;
+          if (!t.includes('/* codex-tech-review-brief-20260517 */')) {
+            const anchor = '/* codex-institution-flow-20260517 */';
+            if (!t.includes(anchor)) throw new Error('institution flow CSS anchor not found');
+            t = t.replace(anchor, `/* codex-tech-review-brief-20260517 */${css}${anchor}`);
+          }
+
+          const oldSnippet = 'els.emptyState.innerHTML=`<div class="review-brief"><h3>複盤重點整理</h3><div class="brief-grid"><div class="brief-card"><span>股票水位</span><strong>${pct(s.stockRatio)}</strong></div><div class="brief-card"><span>最大部位</span><strong>${s.largest?pct(s.largest.weight):"0%"}</strong></div><div class="brief-card"><span>需檢討</span><strong>${s.watch.length}</strong></div><div class="brief-card"><span>未實現損益</span><strong>${money(s.totalPnl)}</strong></div></div><p class="brief-note">CSV 已匯入。這裡先整理複盤前重點；要產生完整 10 段方舟複盤，請按右上角「生成方舟複盤」。</p></div>`;';
+          const newSnippet = 'els.emptyState.innerHTML=`<div class="review-brief"><h3>複盤重點整理</h3><div class="brief-grid"><div class="brief-card"><span>股票水位</span><strong>${pct(s.stockRatio)}</strong></div><div class="brief-card"><span>最大部位</span><strong>${s.largest?pct(s.largest.weight):"0%"}</strong></div><div class="brief-card"><span>需檢討</span><strong>${s.watch.length}</strong></div><div class="brief-card"><span>未實現損益</span><strong>${money(s.totalPnl)}</strong></div></div><div class="brief-conclusion"><strong>下複盤後的總結論</strong>${conclusion(s)}<br><br>目前股票水位 ${pct(s.stockRatio)}，最大部位 ${s.largest?`${s.largest.name} ${pct(s.largest.weight)}`:"尚無"}，需檢討檔數 ${s.watch.length}。</div><p class="brief-note">CSV 已匯入。這裡先整理複盤前重點；要產生完整 10 段方舟複盤，請按右上角「生成方舟複盤」。</p></div>`;';
+          if (t.includes(oldSnippet)) {
+            t = t.replace(oldSnippet, newSnippet);
+          } else if (!t.includes('brief-conclusion')) {
+            throw new Error('review brief HTML anchor not found');
+          }
+
+          const logPath = 'VERSION_LOG.md';
+          const entry = `## 2026-05-17 - tech-review-focus-brief\n- Changed: 匯入 CSV 後的「複盤重點整理」改為科技感重點卡，並加入「下複盤後的總結論」。\n- Preserved: manual 方舟複盤 generation, normal pie chart, 3D holdings building chart, institutional flow feature, target-price tools, and 10-section review output.\n\n`;
+          fs.writeFileSync(path, t);
+          let log = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
+          if (!log.includes('tech-review-focus-brief')) fs.writeFileSync(logPath, entry + log);
+          NODE
+      - name: Commit tech review brief
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Make pre-review focus brief more prominent"
+          git push
