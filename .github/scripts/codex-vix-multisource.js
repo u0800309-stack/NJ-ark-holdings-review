@@ -34,7 +34,7 @@ if (!s.includes('id="vixTicker"')) {
 }
 if (!s.includes('[hidden]{display:none!important}')) s = s.replace('</style>', '[hidden]{display:none!important}</style>');
 if (s.includes('async function fetchVixOnce()')) {
-  s = s.replace(/async function fetchVixOnce\(\)\{[\s\S]*?\n\}function vixText\(\)/, fn + '\nfunction vixText()');
+  s = s.replace(/async function fetchVixOnce\(\)\{[\s\S]*?function vixText\(\)/, fn + '\nfunction vixText()');
 } else {
   s = s.replace('document.querySelectorAll(".tab").forEach', fn + '\ndocument.querySelectorAll(".tab").forEach');
 }
