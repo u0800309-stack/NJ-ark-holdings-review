@@ -1,3 +1,7 @@
+## 2026-05-17 - thicker-3d-donut-pie
+- Fixed: 持股占比圓餅圖 now has a thicker 3D donut body with a lower extrusion layer, stronger center-hole shadow, and glowing base.
+- Preserved: CSV import behavior, manual 方舟複盤 generation, 3D holdings building chart, target-price tools, and 10-section review output.
+
 ## 2026-05-17 - precise-hud-fit-and-3d-donut
 - Fixed: 重大持股 3D 結構圖 now scales the whole city stage inside the card instead of overflowing.
 - Fixed: 持股占比圓餅圖 now uses a tilted, thicker neon 3D donut treatment closer to the reference.
