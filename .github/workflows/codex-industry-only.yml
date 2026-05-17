@@ -1,0 +1,75 @@
+name: Codex industry analysis only
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add industry whitepaper column
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          path = Path('index.html')
+          t = path.read_text(encoding='utf-8')
+
+          if 'codex-industry-only-20260517' not in t:
+              t = t.replace('*{box-sizing:border-box}', '*{box-sizing:border-box}/* codex-industry-only-20260517 */.industry-btn{min-height:32px;padding:0 10px;white-space:nowrap}.analysis-row td{background:#f8faf6!important}.whitepaper{border:1px solid rgba(24,60,74,.22);border-left:5px solid var(--navy);border-radius:8px;background:#fff;padding:16px;white-space:pre-line;line-height:1.75;color:#26363d}.whitepaper strong{display:block;margin-bottom:10px;color:#10242d;font-size:18px}.whitepaper .meta{display:block;margin-bottom:10px;color:var(--muted);font-size:13px}')
+
+          t = t.replace('const state={rows:[],analyzed:[],lastTotals:null,lastSummary:null};', 'const state={rows:[],analyzed:[],lastTotals:null,lastSummary:null,industryReports:{}};')
+          if 'industryReports' not in t:
+              t = t.replace('lastSummary:null};', 'lastSummary:null,industryReports:{}};')
+
+          if '<th>產業分析</th>' not in t:
+              t = t.replace('<th>位階</th><th>持有邏輯</th></tr>', '<th>位階</th><th>持有邏輯</th><th>產業分析</th></tr>')
+          t = t.replace('colspan="13"', 'colspan="14"')
+
+          new_table = r'''function table(){els.tableBody.innerHTML=state.analyzed.map(r=>`<tr><td><span class="badge ${r.tone}">${esc(r.status)}</span></td><td>${esc(r.symbol)}</td><td>${esc(r.name)}</td><td>${esc(r.sector)}</td><td class="num">${num(r.shares)}</td><td class="num">${num(r.avgCost,2)}</td><td class="num">${num(r.price,2)}</td><td class="num">${money(r.value)}</td><td class="num">${pct(r.weight)}</td><td class="num">${money(r.pnl)}</td><td class="num">${pct(r.pnlPct)}</td><td>${esc(r.level)}</td><td>${esc(r.thesis)}</td><td><button class="btn industry-btn" data-symbol="${esc(r.symbol)}" type="button">分析產業</button></td></tr>${state.industryReports&&state.industryReports[r.symbol]?`<tr class="analysis-row"><td colspan="14"><div class="whitepaper"><strong>《產業策略白皮書》${esc(r.name)}（${esc(r.symbol)}）</strong><span class="meta">依目前持股資料、產業欄位與部位狀態產生。實際投資前仍應搭配最新財報、法說會與公開申報資料校準。</span>${esc(state.industryReports[r.symbol])}</div></td></tr>`:""}`).join("")}'''
+          if 'industry-btn' not in t:
+              t, n = re.subn(r'function table\(\)\{els\.tableBody\.innerHTML=state\.analyzed\.map\(r=>`<tr>[\s\S]*?</tr>`\)\.join\(""\)\}', new_table, t, count=1)
+              if n != 1:
+                  raise SystemExit('table function replace failed')
+
+          funcs = r'''function industryWhitepaper(r){const cycle=r.isWeak?'處於修正與驗證期':r.isHigh?'處於高位階收斂期':'處於觀察與延展期';const pricing=r.pnlPct>0?'市場目前給予較正向的定價反應':'市場定價仍偏保守，需確認營運改善是否具延續性';return `1. 基本面分析：${r.name} 的核心商業模式可先從「${r.sector}」產業定位切入，重點觀察其產品或服務是否具備規模化、客戶黏著度與差異化能力。若企業能在關鍵供應鏈、技術規格、通路或品牌信任上形成門檻，通常較能維持市場定價權；目前持股狀態為「${r.status}」，代表需要把基本面強度與股價位階一起評估。
+
+2. 財報解讀：近三年營收應觀察成長是否由單一景氣循環帶動，或來自產品組合升級與市占率提升；毛利率可用來判斷定價權與成本壓力，營業現金流則驗證獲利品質。負債結構方面，若短債比重上升或自由現金流轉弱，會降低景氣下行時的防禦能力；若現金流穩定且資本支出具效率，則有助支撐中長期投資。
+
+3. 產業趨勢：${r.sector} 的總潛在市場空間需從需求成長、技術替代、政策環境與客戶資本支出週期判斷。中長期需求若來自結構性趨勢，企業評價通常可維持較高韌性；若主要依賴短期庫存回補或單一題材，則需提高情境壓力測試。
+
+4. 未來潛力：${r.name} 目前可視為${cycle}。產品線若能從既有優勢延伸到更高毛利、更高黏著度或更大市場空間的領域，未來潛力會提高；反之，若成長主要依賴單一產品或單一客戶，則需要折價看待。${pricing}。
+
+5. 策略風險與挑戰：主要風險包括需求放緩、價格競爭、技術路線更替、供應鏈成本、政策限制與估值壓縮。具體應對上，若部位占比已達 ${pct(r.weight)}，應設定財報驗證點、位階停利條件與基本面轉弱的減碼規則；若未來營收、毛利率或現金流連續轉弱，應優先降低部位而非被動等待股價反彈。`}function analyzeIndustry(symbol){if(!state.industryReports)state.industryReports={};if(!state.analyzed.length&&state.rows.length)analyze();const r=state.analyzed.find(x=>x.symbol===symbol);if(!r)return;state.industryReports[symbol]=industryWhitepaper(r);table();toast(`${r.symbol} 產業策略白皮書已產生。`)}'''
+          if 'function industryWhitepaper(r)' not in t:
+              anchor = 'function flowMetrics(s,t){' if 'function flowMetrics(s,t){' in t else 'function smart(s){'
+              t = t.replace(anchor, funcs + anchor)
+
+          if 'closest(".industry-btn")' not in t:
+              t = t.replace('els.loadSample.onclick=()=>loadCsv(sampleCsv);', 'document.addEventListener("click",e=>{const b=e.target.closest(".industry-btn");if(b)analyzeIndustry(b.dataset.symbol)});els.loadSample.onclick=()=>loadCsv(sampleCsv);')
+
+          path.write_text(t, encoding='utf-8')
+          log = Path('VERSION_LOG.md')
+          entry = '''## 2026-05-17 - per-holding-industry-whitepaper-only
+- Added: 持股明細新增「產業分析」欄，每一檔可按「分析產業」產生《產業策略白皮書》。\n- Output: 依序呈現基本面分析、財報解讀、產業趨勢、未來潛力、策略風險與挑戰。\n- Preserved: CSV import behavior, normal pie chart, 3D holdings building chart, institutional flow feature, target-price tools, and 10-section review output.\n\n'''
+          old = log.read_text(encoding='utf-8') if log.exists() else ''
+          if 'per-holding-industry-whitepaper-only' not in old:
+              log.write_text(entry + old, encoding='utf-8')
+          PY
+      - name: Commit industry feature
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Add per-holding industry whitepaper buttons"
+          git push
