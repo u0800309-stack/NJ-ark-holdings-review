@@ -1,0 +1,46 @@
+name: Codex fix hidden review output
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce hidden attribute
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          t = p.read_text(encoding='utf-8')
+          marker = '/* codex-hidden-fix-20260517 */'
+          if marker not in t:
+              t = t.replace('*{box-sizing:border-box}', '*{box-sizing:border-box}'+marker+'[hidden]{display:none!important}')
+          log = Path('VERSION_LOG.md')
+          entry = '''## 2026-05-17 - hidden-review-output-fix
+- Fixed: 匯入 CSV 後，舊版「下複盤後的總結論」不再因 CSS 覆蓋 hidden 屬性而重複顯示。
+- Preserved: 複盤重點整理、手動生成方舟複盤、持股明細、智慧工具與一般圓餅圖。
+
+'''
+          p.write_text(t, encoding='utf-8')
+          old = log.read_text(encoding='utf-8') if log.exists() else ''
+          if 'hidden-review-output-fix' not in old:
+              log.write_text(entry + old, encoding='utf-8')
+          PY
+      - name: Commit hidden fix
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Fix duplicate pre-review conclusion display"
+          git push
