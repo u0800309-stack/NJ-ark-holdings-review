@@ -1,5 +1,14 @@
 # Version Log
 
+## 2026-05-17 - full-smart-tools-before-history-review
+
+- Commit: `c3655d680578ca32c432eb4cb8ebec57ca486e3c`
+- Scope: Restore the latest functional state before the request `幫我做一個歷史複盤績效回顧`.
+- Restored: `方舟複盤`, `持股明細`, `智慧工具`.
+- Smart tools included: smart Q&A, target price consensus and AI judgment, portfolio stress test, voice review reading, position diagnostics, and rebalance priority.
+- Removed from public page: `歷史績效` / history review page.
+- Recovery note: to restore this version later, reset `main/index.html` to commit `c3655d680578ca32c432eb4cb8ebec57ca486e3c`.
+
 ## 2026-05-17 - pre-517-complete-feature-restore
 
 - Commit: `73f1fdcadfa73bc5abc3620465608dfbed2b0156`
