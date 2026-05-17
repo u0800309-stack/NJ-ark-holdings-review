@@ -1,0 +1,55 @@
+name: Codex rich review and VIX
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch rich review and VIX
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          t=p.read_text(encoding='utf-8')
+          if '/* codex-rich-review-vix-20260517 */' not in t:
+              t=t.replace('*{box-sizing:border-box}', '*{box-sizing:border-box}/* codex-rich-review-vix-20260517 */[hidden]{display:none!important}.vix-brief{display:inline-flex;align-items:center;gap:8px;margin:0 0 12px;padding:8px 12px;border:1px solid rgba(215,169,62,.45);border-radius:8px;background:#071526;color:#f2c66d;font-weight:900}')
+          override = r'''
+async function fetchVixOnce(){try{const res=await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?range=1d&interval=1m&corsDomain=finance.yahoo.com',{cache:'no-store'});const data=await res.json();const result=data.chart?.result?.[0];const meta=result?.meta||{};const closes=result?.indicators?.quote?.[0]?.close||[];const last=[...closes].reverse().find(x=>Number.isFinite(x));const v=Number(meta.regularMarketPrice||last);state.lastVix=Number.isFinite(v)?{value:v,time:new Date()}:null}catch(e){state.lastVix=null}}
+function vixText(){if(!state.lastVix)return 'VIX：暫時抓不到最新資料';const v=state.lastVix.value;const tag=v>=25?'恐慌偏高':v>=18?'波動升溫':'風險平穩';return `VIX ${v.toFixed(2)}（${tag}）`}
+function richParagraph(title,body,actions){return `${body}\n\n操作重點：${actions}`}
+review=function(s,t){els.emptyState.hidden=true;els.reviewOutput.hidden=false;const market=els.marketContext.value.trim()||'尚未輸入大盤脈絡，因此本次先以持股水位、集中度、位階、損益品質與 VIX 風險溫度作為主要判斷。';const vix=vixText();const topRows=state.analyzed.slice(0,5);const top=topRows.map(r=>`${r.name} ${pct(r.weight)}`).join('、');const sector=s.sectors.map(([n,w])=>`${n} ${pct(w)}`).join('、');const watchList=(s.watch.length?s.watch:state.analyzed).slice(0,6).map(r=>`${r.name}：${r.status}，占比 ${pct(r.weight)}，損益率 ${pct(r.pnlPct)}，位階 ${r.level}`).join('\n');const final=conclusion(s);const secs=[['先講總結','#183c4a',richParagraph('先講總結',`目前股票水位 ${pct(s.stockRatio)}，整體判定為「${s.water}」。未實現損益 ${money(s.totalPnl)}，組合報酬率約 ${pct(s.totalPnlPct)}。${vix}。本次複盤的核心不是單純看賺賠，而是確認資金是否集中在邏輯清楚、位階合理、仍具資金效率的標的上。`, s.water==='偏高'?'先暫停無差別加碼，優先處理高位階與過度集中部位。':'維持核心部位，針對弱勢或邏輯不清的持股做汰弱留強。')],['庫存總覽','#147a78',richParagraph('庫存總覽',`持股市值 ${money(t.stock)}，現金 ${money(t.cash)}，總資產 ${money(t.total)}。前五大部位為：${top||'尚無資料'}。最大部位 ${s.largest?`${s.largest.name} ${pct(s.largest.weight)}`:'尚無'}，代表組合波動會明顯受到其走勢影響。`, '確認前五大持股是否仍符合原始投資邏輯；若最大部位超過個人舒適水位，分批降集中度。')],['大盤與時事脈絡','#456aa8',richParagraph('大盤與時事脈絡',`${market}\n${vix} 可作為短線風險溫度計：VIX 偏高時，成長股與高估值題材通常更容易放大波動；VIX 平穩時，則可把重點放回產業趨勢與個股基本面。`, '若 VIX 升高，新增資金採分批；若 VIX 回落且基本面未變，才考慮提高進攻部位。')],['部位結構','#456aa8',richParagraph('部位結構',`市場/產業分布：${sector||'尚無資料'}。集中度觀察：${names(s.con,'目前沒有單一部位超過上限')}。若同產業持股高度重疊，表面上是多檔分散，實際上仍可能承擔同一個景氣循環風險。`, '把同產業標的視為同一風險群組，設定群組上限，而不是只看單一股票上限。')],['各檔檢視','#147a78',richParagraph('各檔檢視',watchList||'尚無可檢視標的。', '優先檢查「占比高但邏輯弱化」、「虧損但沒有明確催化」、「漲多且位階偏高」三類標的。')],['調節四問','#d7a93e',richParagraph('調節四問',fourQ(s.watch), '每次調節前固定回答：邏輯是否還在、資金效率是否夠好、有無更佳替代、續抱風險是否值得。')],['風控水位','#bd4f48',richParagraph('風控水位',risk(s), '把現金視為選擇權。水位偏高時保留現金能降低被迫賣出的機率；水位偏低時則分批回補勝率較高標的。')],['資金效率','#456aa8',richParagraph('資金效率',`需檢討檔數 ${s.watch.length}，弱勢標的 ${s.weak.length}，高位階標的 ${s.high.length}。資金效率的重點，是讓每一筆資金都有明確任務：防守、成長、波段或等待更好價格。`, '低效率部位若沒有明確催化，應轉向更有定價權、更高能見度或更合理位階的標的。')],['目標價與估值檢查','#d7a93e',richParagraph('目標價與估值檢查','個股加減碼不能只看帳面損益，還要比對最新機構目標價、評等變化、分歧幅度與現價空間。若目標價分歧很大，代表市場對未來獲利假設尚未收斂。', '到智慧工具按「蒐集並分析」，用最新公開目標價檢查上行空間與估值風險。')],['最後總結評估','#437f53',richParagraph('最後總結評估',final, '先處理會傷害整體組合品質的部位，再考慮增加進攻。好的複盤不是預測明天，而是讓下一次決策更有紀律。')]];els.reviewOutput.innerHTML=`<section class="summary"><span class="vix-brief">${esc(vix)}</span><h3>下複盤後的總結論</h3><p>${esc(final)}\n\n目前股票水位 ${pct(s.stockRatio)}，最大部位 ${s.largest?`${s.largest.name} ${pct(s.largest.weight)}`:'尚無'}，需檢討檔數 ${s.watch.length}。</p></section>`+secs.map((x,i)=>`<section class="section" style="--tone:${x[1]}"><b>${i+1}</b><article><h3>${esc(x[0])}</h3><p>${esc(x[2])}</p></article></section>`).join('')}
+const originalGenerate=generate;generate=async function(){if(!state.rows.length){const v=els.csvInput.value.trim();return v?loadCsv(v,true):reset('請先匯入或貼上持股庫存。')}await fetchVixOnce();return originalGenerate()}
+'''
+          if 'function fetchVixOnce()' not in t:
+              t=t.replace('document.querySelectorAll(".tab").forEach', override+'document.querySelectorAll(".tab").forEach')
+          p.write_text(t,encoding='utf-8')
+          log=Path('VERSION_LOG.md')
+          entry='''## 2026-05-17 - richer-review-with-on-demand-vix
+- Changed: 按「生成方舟複盤」時才抓最新 VIX，並放入複盤首頁與總結。
+- Changed: 10 段方舟複盤內文加厚，加入判斷依據、風控脈絡與操作重點。
+- Fixed: hidden 屬性優先，避免匯入後舊結論重複顯示。
+
+'''
+          old=log.read_text(encoding='utf-8') if log.exists() else ''
+          if 'richer-review-with-on-demand-vix' not in old:
+              log.write_text(entry+old,encoding='utf-8')
+          PY
+      - name: Commit rich review VIX
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Enrich review output and fetch VIX on demand"
+          git push
