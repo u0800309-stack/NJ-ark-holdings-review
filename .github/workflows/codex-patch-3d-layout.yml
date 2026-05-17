@@ -1,0 +1,60 @@
+name: Codex patch smart layout and 3D chart
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch index.html precisely
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'index.html';
+          let t = fs.readFileSync(path, 'utf8');
+          const replacements = [
+            [
+              '.dash{display:grid;grid-template-columns:1fr 1fr;gap:12px}.toast{position:fixed;right:16px;bottom:16px;',
+              '.dash{display:grid;grid-template-columns:1fr 1fr;gap:12px}#smartTools .dash{grid-template-columns:1fr}#smartTools .card{min-width:0}#smartTools .table table{min-width:620px}#smartTools textarea{max-height:180px}.toast{position:fixed;right:16px;bottom:16px;'
+            ],
+            [
+              '.s3d{min-height:340px;perspective:1100px;display:flex;align-items:flex-end;gap:28px;padding:42px 34px 54px;border-radius:8px;background:radial-gradient(circle at 20% 18%,rgba(255,255,255,.96),rgba(241,246,238,.72) 40%,rgba(225,234,221,.82)),linear-gradient(135deg,rgba(24,60,74,.08) 0 1px,transparent 1px),linear-gradient(45deg,rgba(24,60,74,.06) 0 1px,transparent 1px);background-size:auto,34px 34px,34px 34px;overflow:auto}.tower{position:relative;flex:1;min-width:86px;height:250px;display:flex;align-items:flex-end;justify-content:center;transform-style:preserve-3d}',
+              '.s3d{min-height:360px;perspective:1200px;display:grid;place-items:end center;padding:48px 34px 64px;border-radius:8px;background:radial-gradient(circle at 20% 18%,rgba(255,255,255,.96),rgba(241,246,238,.72) 40%,rgba(225,234,221,.82)),linear-gradient(135deg,rgba(24,60,74,.08) 0 1px,transparent 1px),linear-gradient(45deg,rgba(24,60,74,.06) 0 1px,transparent 1px);background-size:auto,34px 34px,34px 34px;overflow:hidden}.city3d{width:max-content;max-width:100%;display:flex;align-items:flex-end;justify-content:center;gap:30px;transform-style:preserve-3d;animation:citySpin 13s ease-in-out infinite;will-change:transform}@keyframes citySpin{0%,100%{transform:rotateX(2deg) rotateY(-24deg) translateZ(0)}50%{transform:rotateX(2deg) rotateY(24deg) translateZ(0)}}.tower{position:relative;flex:0 0 86px;min-width:86px;height:250px;display:flex;align-items:flex-end;justify-content:center;transform-style:preserve-3d}'
+            ],
+            [
+              'els.majorStructure3d.innerHTML=rows.slice(0,6).map((r,i)=>`<div class="tower"><div class="bar3" style="--h:${Math.max(46,Math.round(r.value/max*230))}px;--c:${color(i)}"></div><span>${esc(r.symbol)} ${pct(r.weight)}</span></div>`).join("")',
+              'els.majorStructure3d.innerHTML=`<div class="city3d">${rows.slice(0,6).map((r,i)=>`<div class="tower"><div class="bar3" style="--h:${Math.max(52,Math.round(r.value/max*230))}px;--c:${color(i)}"></div><span>${esc(r.symbol)} ${pct(r.weight)}</span></div>`).join("")}</div>`'
+            ]
+          ];
+          let changed = false;
+          for (const [from, to] of replacements) {
+            if (t.includes(to)) continue;
+            if (!t.includes(from)) throw new Error('Patch anchor not found: ' + from.slice(0, 80));
+            t = t.replace(from, to);
+            changed = true;
+          }
+          if (changed) fs.writeFileSync(path, t);
+          const logPath = 'VERSION_LOG.md';
+          const entry = `## 2026-05-17 - smart-layout-rotating-building-3d\n- Scope: Fixed the 智慧工具 layout so target-price tables no longer squeeze the Q&A card.\n- Scope: Reworked 重大持股 3D 結構圖 into an animated rotating building-style city model.\n- Preserved: CSV import, 方舟複盤 10 sections, 持股明細 pie chart, 智慧工具 target-price collection and analysis.\n\n`;
+          let log = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
+          if (!log.includes('smart-layout-rotating-building-3d')) fs.writeFileSync(logPath, entry + log);
+          NODE
+      - name: Commit patch
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Fix smart layout and rotating 3D building chart"
+          git push
