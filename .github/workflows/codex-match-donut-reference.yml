@@ -1,0 +1,51 @@
+name: Codex match donut reference
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Match 3D donut reference style
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'index.html';
+          let t = fs.readFileSync(path, 'utf8');
+
+          const overrides = `.piewrap{min-height:520px;perspective:1050px;align-content:start}.piewrap:before{top:116px;width:min(430px,96%);transform:translateX(-50%) rotateX(64deg);border:2px solid rgba(19,151,255,.62);box-shadow:0 0 34px rgba(26,158,255,.78),inset 0 0 28px rgba(22,165,255,.32)}.piewrap:after{content:"";position:absolute;left:50%;top:314px;width:min(390px,90%);height:62px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(0,138,255,.42),rgba(0,44,114,.22) 50%,transparent 74%);box-shadow:0 0 34px rgba(0,149,255,.68);filter:blur(.4px);pointer-events:none}.pie{width:min(365px,92%);margin:54px auto -2px;transform:rotateX(46deg) translateY(-4px);transform-style:preserve-3d;overflow:visible;background-clip:border-box;box-shadow:inset 0 0 0 4px rgba(166,232,255,.98),inset 0 0 0 72px #061530,0 0 0 2px rgba(18,185,255,.72),0 0 0 12px rgba(25,139,255,.12),0 0 42px rgba(43,157,255,.92),0 48px 42px rgba(0,0,0,.48)}.pie:before{content:"";position:absolute;inset:0;border-radius:50%;background:inherit;transform:translateY(42px) translateZ(-54px);filter:brightness(.62) saturate(1.35);box-shadow:inset 0 0 0 4px rgba(75,184,255,.74),inset 0 0 0 72px #020914,0 0 20px rgba(0,119,255,.5);-webkit-mask:radial-gradient(circle,transparent 0 29%,#000 30% 100%);mask:radial-gradient(circle,transparent 0 29%,#000 30% 100%);z-index:-1}.pie:after{content:"";position:absolute;inset:30%;border-radius:50%;background:radial-gradient(circle at 46% 30%,#102f62,#020711 72%);box-shadow:inset 0 18px 30px rgba(0,0,0,.9),0 -5px 14px rgba(177,238,255,.72),0 0 30px rgba(37,162,255,.72);z-index:3}.legend{margin-top:28px}`;
+
+          const existing = /\/\* codex-donut-reference-mode-20260517 \*\/[\s\S]*?\/\* codex-thick-donut-20260517 \*\//;
+          if (existing.test(t)) {
+            t = t.replace(existing, `/* codex-donut-reference-mode-20260517 */${overrides}/* codex-thick-donut-20260517 */`);
+          } else {
+            const anchor = '/* codex-thick-donut-20260517 */';
+            if (!t.includes(anchor)) throw new Error('Thick donut CSS anchor not found');
+            t = t.replace(anchor, `/* codex-donut-reference-mode-20260517 */${overrides}${anchor}`);
+          }
+
+          const logPath = 'VERSION_LOG.md';
+          const entry = `## 2026-05-17 - donut-reference-mode\n- Fixed: 持股占比圓餅圖 adjusted toward the provided reference mode: fuller top surface, visible lower extrusion, stronger slice glow, deeper center hole, and blue sci-fi base ring.\n- Preserved: CSV import behavior, manual 方舟複盤 generation, 3D holdings building chart, target-price tools, and 10-section review output.\n\n`;
+          fs.writeFileSync(path, t);
+          let log = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
+          if (!log.includes('donut-reference-mode')) fs.writeFileSync(logPath, entry + log);
+          NODE
+      - name: Commit donut reference mode
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Match holdings donut chart to reference mode"
+          git push
