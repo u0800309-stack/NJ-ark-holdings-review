@@ -1,3 +1,8 @@
+## 2026-05-17 - direct-reference-hud-visual-match
+- Scope: Pushed 持股占比圓餅圖 and 重大持股 3D 結構圖 closer to the provided dark-blue neon HUD reference.
+- Details: Added angular HUD frames, title glow bars, stronger 3D donut depth, neon legend rows, city-grid background, building badges, glowing bases, and sharper tower labels.
+- Preserved: CSV import behavior, manual 方舟複盤 generation, holdings table, target-price tools, and 10-section review output.
+
 ## 2026-05-17 - hud-holdings-and-manual-review-generation
 - Scope: Changed CSV import so it only imports and refreshes holdings visuals; full 方舟複盤 now generates only after pressing 生成方舟複盤.
 - Scope: Replaced the blank pre-review area with 複盤重點整理 cards.
