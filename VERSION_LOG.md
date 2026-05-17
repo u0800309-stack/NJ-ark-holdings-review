@@ -1,3 +1,8 @@
+## 2026-05-17 - reference-style-holdings-visuals
+- Scope: Restyled 持股占比圓餅圖 into a large white-card donut chart with right-side separated legend.
+- Scope: Restyled 重大持股 3D 結構圖 into four glass building towers with base, roof, window grid, blue stage, and rotation animation.
+- Preserved: CSV import, 方舟複盤 10 sections, 智慧工具 target-price collection and analysis.
+
 ## 2026-05-17 - smart-layout-rotating-building-3d
 - Scope: Fixed the 智慧工具 layout so target-price tables no longer squeeze the Q&A card.
 - Scope: Reworked 重大持股 3D 結構圖 into an animated rotating building-style city model.
