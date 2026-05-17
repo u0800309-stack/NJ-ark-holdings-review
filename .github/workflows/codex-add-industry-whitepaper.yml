@@ -1,0 +1,73 @@
+name: Codex add industry whitepaper
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add per-holding industry analysis whitepaper
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'index.html';
+          let t = fs.readFileSync(path, 'utf8');
+
+          const css = `.industry-btn{min-height:32px;padding:0 10px}.analysis-row td{background:#f8faf6}.whitepaper{border:1px solid rgba(24,60,74,.22);border-left:5px solid var(--navy);border-radius:8px;background:#fff;padding:16px;white-space:pre-line;line-height:1.75;color:#26363d}.whitepaper strong{display:block;margin-bottom:10px;color:#10242d;font-size:18px}.whitepaper .meta{display:block;margin-bottom:10px;color:var(--muted);font-size:13px}`;
+          if (!t.includes('/* codex-industry-whitepaper-20260517 */')) {
+            const anchor = '/* codex-tech-review-brief-20260517 */';
+            if (!t.includes(anchor)) throw new Error('tech brief anchor not found');
+            t = t.replace(anchor, `/* codex-industry-whitepaper-20260517 */${css}${anchor}`);
+          }
+
+          t = t.replace('const state={rows:[],analyzed:[],lastTotals:null,lastSummary:null};', 'const state={rows:[],analyzed:[],lastTotals:null,lastSummary:null,industryReports:{}};');
+
+          t = t.replace('<th>位階</th><th>持有邏輯</th></tr>', '<th>位階</th><th>持有邏輯</th><th>產業分析</th></tr>');
+          t = t.replace('<tr><td colspan="13">尚無資料</td></tr>', '<tr><td colspan="14">尚無資料</td></tr>');
+          t = t.replace("els.tableBody.innerHTML='<tr><td colspan=\"13\">尚無資料</td></tr>';", "els.tableBody.innerHTML='<tr><td colspan=\"14\">尚無資料</td></tr>'; ");
+
+          const oldTable = 'function table(){els.tableBody.innerHTML=state.analyzed.map(r=>`<tr><td><span class="badge ${r.tone}">${esc(r.status)}</span></td><td>${esc(r.symbol)}</td><td>${esc(r.name)}</td><td>${esc(r.sector)}</td><td class="num">${num(r.shares)}</td><td class="num">${num(r.avgCost,2)}</td><td class="num">${num(r.price,2)}</td><td class="num">${money(r.value)}</td><td class="num">${pct(r.weight)}</td><td class="num">${money(r.pnl)}</td><td class="num">${pct(r.pnlPct)}</td><td>${esc(r.level)}</td><td>${esc(r.thesis)}</td></tr>`).join("")}';
+          const newTable = 'function table(){els.tableBody.innerHTML=state.analyzed.map(r=>`<tr><td><span class="badge ${r.tone}">${esc(r.status)}</span></td><td>${esc(r.symbol)}</td><td>${esc(r.name)}</td><td>${esc(r.sector)}</td><td class="num">${num(r.shares)}</td><td class="num">${num(r.avgCost,2)}</td><td class="num">${num(r.price,2)}</td><td class="num">${money(r.value)}</td><td class="num">${pct(r.weight)}</td><td class="num">${money(r.pnl)}</td><td class="num">${pct(r.pnlPct)}</td><td>${esc(r.level)}</td><td>${esc(r.thesis)}</td><td><button class="btn industry-btn" data-symbol="${esc(r.symbol)}" type="button">分析產業</button></td></tr>${state.industryReports[r.symbol]?`<tr class="analysis-row"><td colspan="14"><div class="whitepaper"><strong>《產業策略白皮書》${esc(r.name)}（${esc(r.symbol)}）</strong><span class="meta">依目前持股資料、產業欄位與部位狀態產生。實際投資前仍應搭配最新財報、法說會與公開申報資料校準。</span>${esc(state.industryReports[r.symbol])}</div></td></tr>`:""}`).join("")}';
+          if (t.includes(oldTable)) {
+            t = t.replace(oldTable, newTable);
+          } else if (!t.includes('industry-btn')) {
+            throw new Error('table function anchor not found');
+          }
+
+          const fn = `function industryWhitepaper(r){const cycle=r.isWeak?'處於修正與驗證期':r.isHigh?'處於高位階收斂期':'處於觀察與延展期';const pricing=r.pnlPct>0?'市場目前給予較正向的定價反應':'市場定價仍偏保守，需確認營運改善是否具延續性';return `+"`"+`1. 基本面分析：${r.name} 的核心商業模式可先從「${r.sector}」產業定位切入，重點觀察其產品或服務是否具備規模化、客戶黏著度與差異化能力。若企業能在關鍵供應鏈、技術規格、通路或品牌信任上形成門檻，通常較能維持市場定價權；目前持股狀態為「${r.status}」，代表需要把基本面強度與股價位階一起評估。\n\n2. 財報解讀：近三年營收應觀察成長是否由單一景氣循環帶動，或來自產品組合升級與市占率提升；毛利率可用來判斷定價權與成本壓力，營業現金流則驗證獲利品質。負債結構方面，若短債比重上升或自由現金流轉弱，會降低景氣下行時的防禦能力；若現金流穩定且資本支出具效率，則有助支撐中長期投資。\n\n3. 產業趨勢：${r.sector} 的總潛在市場空間需從需求成長、技術替代、政策環境與客戶資本支出週期判斷。中長期需求若來自結構性趨勢，企業評價通常可維持較高韌性；若主要依賴短期庫存回補或單一題材，則需提高情境壓力測試。\n\n4. 未來潛力：${r.name} 目前可視為${cycle}。產品線若能從既有優勢延伸到更高毛利、更高黏著度或更大市場空間的領域，未來潛力會提高；反之，若成長主要依賴單一產品或單一客戶，則需要折價看待。${pricing}。\n\n5. 策略風險與挑戰：主要風險包括需求放緩、價格競爭、技術路線更替、供應鏈成本、政策限制與估值壓縮。具體應對上，若部位占比已達 ${pct(r.weight)}，應設定財報驗證點、位階停利條件與基本面轉弱的減碼規則；若未來營收、毛利率或現金流連續轉弱，應優先降低部位而非被動等待股價反彈。`+"`"+`}function analyzeIndustry(symbol){if(!state.analyzed.length&&state.rows.length)analyze();const r=state.analyzed.find(x=>x.symbol===symbol);if(!r)return;state.industryReports[symbol]=industryWhitepaper(r);table();toast(`${r.symbol} 產業策略白皮書已產生。`)}`;
+          if (!t.includes('function industryWhitepaper(r)')) {
+            const anchor = 'function flowMetrics(s,t){';
+            if (!t.includes(anchor)) throw new Error('flowMetrics anchor not found');
+            t = t.replace(anchor, fn + anchor);
+          }
+
+          const listener = 'document.addEventListener("click",e=>{const b=e.target.closest(".industry-btn");if(b)analyzeIndustry(b.dataset.symbol)});';
+          if (!t.includes('closest(".industry-btn")')) {
+            t = t.replace('els.loadSample.onclick=()=>loadCsv(sampleCsv);', listener + 'els.loadSample.onclick=()=>loadCsv(sampleCsv);');
+          }
+
+          const logPath = 'VERSION_LOG.md';
+          const entry = `## 2026-05-17 - per-holding-industry-whitepaper\n- Added: 持股明細新增「產業分析」欄，每一檔可按「分析產業」產生《產業策略白皮書》。\n- Output: 依序呈現基本面分析、財報解讀、產業趨勢、未來潛力、策略風險與挑戰。\n- Preserved: CSV import behavior, normal pie chart, 3D holdings building chart, institutional flow feature, target-price tools, and 10-section review output.\n\n`;
+          fs.writeFileSync(path, t);
+          let log = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
+          if (!log.includes('per-holding-industry-whitepaper')) fs.writeFileSync(logPath, entry + log);
+          NODE
+      - name: Commit industry whitepaper feature
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html VERSION_LOG.md
+          git commit -m "Add per-holding industry whitepaper analysis"
+          git push
