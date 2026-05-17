@@ -1,3 +1,9 @@
+## 2026-05-17 - hud-holdings-and-manual-review-generation
+- Scope: Changed CSV import so it only imports and refreshes holdings visuals; full 方舟複盤 now generates only after pressing 生成方舟複盤.
+- Scope: Replaced the blank pre-review area with 複盤重點整理 cards.
+- Scope: Restyled 持股占比圓餅圖 and 重大持股 3D 結構圖 into a dark neon HUD style similar to the provided reference.
+- Preserved: CSV parsing, holdings table, target-price collection, and 10-section review output.
+
 ## 2026-05-17 - reference-style-holdings-visuals
 - Scope: Restyled 持股占比圓餅圖 into a large white-card donut chart with right-side separated legend.
 - Scope: Restyled 重大持股 3D 結構圖 into four glass building towers with base, roof, window grid, blue stage, and rotation animation.
