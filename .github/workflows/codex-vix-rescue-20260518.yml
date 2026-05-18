@@ -19,7 +19,9 @@ jobs:
         with:
           node-version: '20'
       - name: Wait for other generated patch workflows
-        run: sleep 35
+        run: sleep 55
+      - name: Sync latest main before VIX rescue
+        run: git pull --rebase origin main
       - name: Apply VIX rescue
         run: node .github/scripts/codex-vix-rescue-20260518.js
       - name: Commit VIX rescue
@@ -29,4 +31,5 @@ jobs:
           git add index.html
           git diff --cached --quiet && exit 0
           git commit -m "Fix VIX fallback display"
+          git pull --rebase origin main
           git push
