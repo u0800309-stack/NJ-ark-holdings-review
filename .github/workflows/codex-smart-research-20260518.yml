@@ -1,0 +1,37 @@
+name: Codex smart deep research
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  smart-research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Wait for generated patch workflows
+        run: sleep 65
+      - name: Sync latest main
+        run: git pull --rebase origin main
+      - name: Apply smart deep research
+        run: node .github/scripts/codex-smart-research-20260518.js
+      - name: Reapply VIX instant rescue
+        run: node .github/scripts/codex-vix-rescue-20260518.js
+      - name: Commit smart deep research
+        run: |
+          git config user.name "codex-bot"
+          git config user.email "codex-bot@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Upgrade smart Q&A deep research"
+          git pull --rebase origin main
+          git push
