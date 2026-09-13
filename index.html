@@ -17,6 +17,73 @@
 .flow-visual{margin-top:14px;border:1px solid rgba(24,60,74,.16);border-radius:10px;background:linear-gradient(180deg,#ffffff,#f6fbf8);padding:12px;display:grid;gap:10px}
 .flow-visual-head{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.flow-chip{border:1px solid rgba(24,60,74,.14);border-radius:8px;background:#fff;padding:9px 10px}.flow-chip span{display:block;color:#66757c;font-size:12px}.flow-chip strong{display:block;margin-top:4px;font-size:20px;color:#0b1a2d}.flow-bars{display:grid;gap:9px}.flow-row{display:grid;grid-template-columns:82px minmax(0,1fr) 54px;gap:10px;align-items:center}.flow-name{font-weight:900;color:#10242d}.flow-pair{display:grid;gap:5px}.mini-bar{height:10px;border-radius:999px;background:#e6edf0;overflow:hidden}.mini-fill{height:100%;border-radius:999px}.mini-fill.inst{background:linear-gradient(90deg,#1d7ff2,#55d7ff)}.mini-fill.tax{background:linear-gradient(90deg,#d7a93e,#ffd86b)}.flow-label{font-size:11px;color:#66757c;display:flex;justify-content:space-between}.flow-score{text-align:right;font-weight:900;color:#10242d}.flow-note-text{margin:0;color:#66757c;line-height:1.65}@media(max-width:720px){.flow-visual-head{grid-template-columns:1fr}.flow-row{grid-template-columns:64px minmax(0,1fr) 46px}}
 
+
+/* ARK holdings capital-flow integration */
+.layout>section,.layout>aside{min-width:0}
+#holdings .visuals{grid-template-columns:minmax(0,.76fr) minmax(0,1.24fr)}
+#holdings .pie-card,#holdings .structure-card{min-width:0}
+#holdings .pie-card h3,#holdings .structure-card h3{font-size:22px;padding:8px 20px 12px;line-height:1.5;text-align:center}
+.ark-flow-tools{position:relative;z-index:2;display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin:0 0 12px;color:#c7def1}
+.ark-flow-tools label{flex:1 1 180px;min-width:0;color:#bad5ed;font-size:12px}
+.ark-flow-tools select,.ark-flow-tools button,.ark-flow-connect input,.ark-flow-connect button{background:#102a46;color:#f3f8ff;border:1px solid #43718e;border-radius:6px;font-size:13px}
+.ark-flow-tools button{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;padding:8px}
+.ark-flow-tools svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.ark-flow-tools button:focus-visible,.ark-flow-tower:focus-visible{outline:2px solid #ffd079;outline-offset:4px}
+#majorStructure3d.ark-flow-stage{height:480px;min-height:480px;padding:120px 14px 116px;isolation:isolate;grid-template-columns:minmax(0,1fr)}
+#majorStructure3d.ark-flow-stage:after{display:none}
+.ark-flow-canvas{position:absolute;inset:0;z-index:2;width:100%;height:100%;pointer-events:none}
+.ark-flow-trigger{position:absolute;z-index:3;top:18px;left:18px;max-width:calc(100% - 36px);width:245px;padding:10px 12px;border-left:3px solid #ffd079;background:#0e2842;color:#f6ead0;font-size:13px;line-height:1.5;pointer-events:none}
+.ark-flow-trigger small{display:block;color:#abc8de;font-size:11px;margin-top:3px}
+#majorStructure3d .city3d{z-index:1;--ark-flow-scale:.72;animation-name:arkFlowCity;animation-duration:13s;transform-origin:center bottom}
+@keyframes arkFlowCity{0%,100%{transform:scale(var(--ark-flow-scale)) rotateX(5deg) rotateY(-14deg)}50%{transform:scale(var(--ark-flow-scale)) rotateX(5deg) rotateY(14deg)}}
+#majorStructure3d .tower{cursor:pointer;height:240px}
+#majorStructure3d .tower span{white-space:pre-line;font-size:18px;min-width:112px;line-height:1.3;bottom:-88px}
+#majorStructure3d .tower span small{display:block;margin-top:4px;color:#c4e7fc;font-size:12px;font-weight:600;text-shadow:none}
+#majorStructure3d .ark-flow-selected .bar3{outline:2px solid #fff;outline-offset:4px}
+.ark-flow-paused .city3d{animation-play-state:paused!important}
+.ark-flow-legend{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:12px;margin:14px 0 10px;color:#bed2e8;font-size:11px;line-height:1.5}
+.ark-flow-legend span{display:flex;align-items:center;gap:5px}
+.ark-flow-legend i{width:18px;border-top:2px dashed #ffd079}
+.ark-flow-legend .actual{border-top-style:solid;border-color:#6ae4e1}
+.ark-flow-legend .out{border-top-style:solid;border-color:#ff96aa}
+.ark-flow-summary{position:relative;z-index:2;border-top:1px solid #326181;padding-top:12px;color:#d4e5f3;font-size:13px;line-height:1.75;overflow-wrap:anywhere}
+.ark-flow-summary strong{display:block;color:#fff;margin-bottom:6px;font-size:15px}
+.ark-flow-summary p{margin:6px 0}
+.ark-flow-summary a,.ark-flow-connect a{color:#83ddf4}
+.ark-flow-state{color:#ffdb9a;font-size:11px}
+.ark-flow-connect{position:relative;z-index:2;margin-top:12px;color:#bed2e8;font-size:12px;line-height:1.65}
+.ark-flow-connect summary{cursor:pointer;color:#83ddf4}
+.ark-flow-connect input{margin:8px 0;max-width:100%;padding:8px;width:100%}
+.ark-flow-connect button{min-height:34px;padding:6px 12px}
+.ark-flow-evidence{max-height:220px;overflow:auto;margin:10px 0;border-bottom:1px solid #326181}
+.ark-flow-evidence table{min-width:520px;width:100%;color:#d4e5f3}
+.ark-flow-evidence th{background:#102a46;color:#bad5ed;position:static}
+.ark-flow-evidence td,.ark-flow-evidence th{font-size:11px;border-color:#326181;padding:8px}
+.ark-flow-message{color:#ffdb9a;overflow-wrap:anywhere}
+@media(max-width:1120px){#holdings .visuals{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)}}
+@media(max-width:800px){#holdings .visuals{grid-template-columns:minmax(0,1fr)}#holdings .structure-card{padding:18px 14px}#majorStructure3d.ark-flow-stage{height:440px;min-height:440px;padding-top:100px}}
+@media(prefers-reduced-motion:reduce){#majorStructure3d .city3d{animation:none;transform:scale(var(--ark-flow-scale))}}
+#holdings .visuals{grid-template-columns:minmax(0,1fr)}
+#holdings .pie-card{box-shadow:none;border-color:#284b63}
+#holdings .piewrap{grid-template-columns:260px minmax(0,1fr)!important;align-items:center}
+#holdings .structure-card{background:#081724;box-shadow:none;border-color:#284b63;border-radius:8px}
+#holdings .structure-card:before,#holdings .structure-card:after{display:none}
+#holdings .structure-card h3{background:none;text-shadow:none;border-bottom:1px solid #284b63}
+#majorStructure3d.ark-network{height:var(--network-height);min-height:560px;display:block;padding:0;perspective:none;background:#081724;box-shadow:none;border-radius:0;border-block:1px solid #284052;overflow:hidden}
+#majorStructure3d.ark-network:before,#majorStructure3d.ark-network:after{display:none}
+.ark-network .ark-flow-canvas{z-index:0}
+.ark-network-column{position:absolute;top:20px;transform:translateX(-50%);font-size:12px;color:#acc2cf;white-space:nowrap}
+.ark-network-node{position:absolute;z-index:1;transform:translate(-50%,-50%);width:17%;min-height:76px;padding:10px 5px;display:grid;align-content:center;gap:5px;border:1px solid #49d9ef;border-radius:6px;background:#102c3b;color:#edf7ff;text-align:center;font:inherit;line-height:1.4;letter-spacing:0;cursor:pointer}
+.ark-network-node strong{font-size:17px;overflow-wrap:anywhere}
+.ark-network-node small{font-size:11px;color:#b3c9d6}
+.ark-network-node.event{border-color:#e8bc61;background:#2b281f}
+.ark-network-node.manager{border-color:#6acfa5;background:#182f2b}
+.ark-network-node[aria-pressed=true]{outline:2px solid #4bd8ed;outline-offset:4px}
+.ark-network-node:focus-visible{outline:2px solid white;outline-offset:4px}
+.ark-network-node .ark-network-weight{color:#87dace}
+@media(max-width:600px){#holdings .piewrap{grid-template-columns:minmax(0,1fr)!important}.ark-network-node{width:28%;padding:8px 3px;min-height:76px}.ark-network-node strong{font-size:13px}.ark-network-node small{font-size:10px}.ark-network-column{font-size:11px}#holdings .structure-card{padding:14px 8px}}
+
+
 /* codex-smart-research-20260518 */
 .smart-report{margin-top:12px;display:grid;gap:12px;color:#21323a}.smart-report h4{margin:0;font-size:18px;color:#10242d}.smart-lead{border-left:5px solid var(--navy);border-radius:8px;background:linear-gradient(135deg,#fff,#f4f8f2);padding:14px;line-height:1.75}.smart-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.smart-kpi{border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px}.smart-kpi span{display:block;color:var(--muted);font-size:12px}.smart-kpi b{display:block;margin-top:4px;font-size:20px;color:#10242d}.smart-groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.smart-group{border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px;min-height:96px}.smart-group strong{display:block;margin-bottom:6px}.smart-group p{margin:0;color:#55656d;line-height:1.6}.smart-list{display:grid;gap:8px}.smart-item{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px;line-height:1.7}.smart-item h5{margin:0 0 6px;font-size:15px;color:#10242d}.smart-item .tag{display:inline-flex;margin-right:6px;margin-bottom:6px;border-radius:99px;padding:2px 8px;font-size:12px;font-weight:900;background:rgba(24,60,74,.1);color:#183c4a}.smart-item .tag.red{background:rgba(189,79,72,.12);color:#bd4f48}.smart-item .tag.green{background:rgba(67,127,83,.14);color:#437f53}.smart-item .tag.gold{background:rgba(215,169,62,.18);color:#7d5b12}.smart-item p{margin:6px 0 0}.smart-action{font-weight:900;color:#10242d}.smart-warn{border:1px solid rgba(189,79,72,.22);border-radius:8px;background:rgba(189,79,72,.06);padding:12px;line-height:1.7}@media(max-width:900px){.smart-kpis,.smart-groups{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.smart-kpis,.smart-groups{grid-template-columns:1fr}}
 </style></head><body><header class="top"><div class="bar"><div class="brand"><div class="mark">ARK</div><div><h1>方舟持股複盤台</h1><p>方舟複盤、持股明細、智慧工具完整功能版。</p></div></div><div class="actions"><button class="btn" id="loadSample">載入範例</button><div class="vix-ticker" id="vixTicker"><span>VIX</span><strong id="vixValue">--</strong><small id="vixTime">按複盤更新</small></div><button class="btn" id="speakReview">AI 語音播報</button><button class="btn primary" id="runReview">生成方舟複盤</button></div></div></header><main class="layout"><aside><section class="panel"><div class="head"><h2>匯入持股庫存</h2></div><div class="body"><div class="drop" id="drop"><div><strong>拖放 CSV 到這裡</strong><br><span class="hint">或選擇檔案，也可以直接貼上券商庫存表。</span><input class="file" id="fileInput" type="file" accept=".csv,.CSV,.cvs,.CVS,text/csv,.txt,.TXT"></div></div><p class="hint">支援：代號、股票名稱、最新價、目前庫存、均價、可用庫存、庫存成本、現值、含息報酬率。</p></div></section><section class="panel"><div class="head"><h3>貼上庫存表</h3><button class="btn danger" id="clearData">清空</button></div><div class="body"><textarea id="csvInput" spellcheck="false" placeholder="代號,股票名稱,最新價,目前庫存,投資損益,報酬率,市場,幣別,均價,可用庫存,庫存成本,現值,含息報酬率&#10;AAPL,Apple Inc,271.35,1,1.44,0.53%,美國,美元,269.91,1,269.91,271.35,0.53%"></textarea><p class="hint">CSV 有逗號、引號、美元符號、百分比、UTF-8 或 Big5 編碼都會自動處理。</p></div></section><section class="panel"><div class="head"><h3>資金與脈絡</h3></div><div class="body"><div class="grid2"><label>台幣現金<input id="cashInput" type="number" value="120000"></label><label>美元現金<input id="usdCashInput" type="number" value="0"></label><label>美元匯率<input id="usdRateInput" type="number" step="0.01" value="32"></label><label>風控滿倉上限 %<input id="maxInvested" type="number" value="80"></label><label>單一持股上限 %<input id="singleLimit" type="number" value="25"></label><label>高位階警戒 %<input id="highGain" type="number" value="20"></label></div><label style="margin-top:12px">時事 / 總經 / 大盤脈絡<textarea id="marketContext" placeholder="例：AI 權值股強勢但輪動加快；美國利率仍偏高，市場等待降息訊號。"></textarea></label></div></section></aside><section><section class="metrics"><div class="metric"><span>總資產</span><strong id="metricAssets">$0</strong></div><div class="metric"><span>股票水位</span><strong id="metricInvested">0%</strong></div><div class="metric"><span>未實現損益</span><strong id="metricPnl">$0</strong></div><div class="metric"><span>最大部位</span><strong id="metricLargest">0%</strong></div><div class="metric"><span>需檢討檔數</span><strong id="metricWatch">0</strong></div></section><section class="panel" style="margin-top:16px"><div class="head"><h2>方舟複盤結果</h2><span class="badge blue" id="statusText">等待匯入</span></div><div class="tabs"><button class="tab active" data-tab="review">方舟複盤</button><button class="tab" data-tab="holdings">持股明細</button><button class="tab" data-tab="smartTools">智慧工具</button></div><div class="tabp active" id="review"><div class="empty" id="emptyState">先匯入持股 CSV，補上現金與大盤脈絡，再按「生成方舟複盤」。</div><div class="review" id="reviewOutput" hidden></div></div><div class="tabp" id="holdings"><div class="visuals"><section class="pie-card"><h3>持股占比圓餅圖</h3><div class="piewrap"><div class="pie" id="holdingPie"></div><div class="legend" id="holdingPieLegend">匯入資料後顯示占比。</div></div></section><section class="structure-card"><h3>重大持股 3D 結構圖</h3><div class="s3d" id="majorStructure3d">匯入資料後顯示重大持股結構。</div></section></div><div class="table"><table><thead><tr><th>狀態</th><th>代號</th><th>名稱</th><th>市場</th><th class="num">股數</th><th class="num">均價</th><th class="num">現價</th><th class="num">市值</th><th class="num">占比</th><th class="num">損益</th><th class="num">損益率</th><th>位階</th><th>產業分析</th></tr></thead><tbody id="tableBody"><tr><td colspan="13">尚無資料</td></tr></tbody></table></div></div><div class="tabp" id="smartTools"><div class="dash"><div class="card"><h3>智慧問答</h3><label>輸入代號、名稱或問題<textarea id="smartQuestion" placeholder="例：AAPL 可以加碼嗎？哪一檔壓力最大？哪些需要調節？"></textarea></label><button class="btn primary" id="askHolding" style="margin-top:10px">分析</button><p id="smartAnswer" class="hint">匯入持股後，可以針對個股或整體組合提問。</p></div><div class="card"><h3>機構目標價共識與 AI 判定</h3><div class="grid2"><label>股票代號<input id="targetSymbol" placeholder="例如 GEV、AAPL、NVDA"></label><label>目前價格<input id="manualCurrentPrice" type="number" step="0.01" placeholder="可留空，用持股現價"></label></div><label style="margin-top:10px">貼上目標價資料<textarea id="targetInput" placeholder="機構,評等,目標價,日期&#10;HSBC,買進,1350,2026-05-01"></textarea></label><div class="grid3" style="margin-top:10px"><div class="metric"><span>低標</span><strong id="targetLow">--</strong></div><div class="metric"><span>最可能目標價</span><strong id="targetMean">--</strong></div><div class="metric"><span>高標</span><strong id="targetHigh">--</strong></div></div><div class="actions" style="margin-top:10px"><button class="btn" id="collectTargetPrice">蒐集並分析</button><button class="btn primary" id="judgeTargetPrice">重新判斷</button></div><div class="table" style="margin-top:10px;max-height:240px"><table><thead><tr><th>機構</th><th>評等</th><th class="num">目標價</th></tr></thead><tbody id="targetRows"><tr><td colspan="3">尚未輸入目標價資料</td></tr></tbody></table></div><p id="targetAnalysis" class="hint">每次按「蒐集並分析」都會重新抓最新公開資料，再做 AI 判定。</p></div></div><div class="card" style="margin-top:12px"><h3>機構資金與籌碼流向</h3><div class="flow-cards"><div class="flow-card flow-net" id="flowNetCard"><span>近期機構淨流向</span><strong id="flowNet">--</strong><small>大戶資金動能</small></div><div class="flow-card"><span>總機構持股比例</span><strong id="flowOwnership">--</strong><small>籌碼穩定度</small></div><div class="flow-card"><span>買賣力道分布</span><div class="force-bar"><div class="force-buy" id="flowBuyBar" style="width:50%"></div></div><div class="force-labels"><span id="flowBuy">買進 --</span><span id="flowSell">賣出 --</span></div></div></div><p id="flowNote" class="hint" style="margin-top:10px">匯入持股後，系統會依部位集中度、損益動能、位階風險與持股水位估算機構資金與籌碼流向。</p></div><div class="card" style="margin-top:12px"><h3>AI 投資組合情境壓力測試</h3><div class="grid3"><label>情境<select id="stressScenario"><option value="inflation">通膨反彈 / 利率偏高</option><option value="aiSlowdown">AI 題材修正</option><option value="geopolitics">地緣政治衝擊</option><option value="recession">總經衰退</option><option value="custom">自訂</option></select></label><label>大盤衝擊 %<input id="marketShock" type="range" min="-40" max="10" value="-14"></label><label>科技 beta<input id="betaShock" type="range" min="80" max="200" value="130"></label></div><p id="stressOutput" class="hint">匯入持股後會自動產生壓力測試結果。</p></div><div class="dash" style="margin-top:12px"><div class="card"><h3>部位診斷</h3><p id="diagnosticOutput" class="hint">匯入資料後整理集中度、市場分布、位階壓力與資金效率。</p></div><div class="card"><h3>調節優先順序</h3><p id="rebalanceOutput" class="hint">系統會依照超限、位階、虧損與邏輯完整度排序。</p></div></div></div></section></section></main><div class="toast" id="toast"></div><script>const sampleCsv=`代號,股票名稱,最新價,目前庫存,投資損益,報酬率,市場,幣別,均價,可用庫存,庫存成本,現值,含息報酬率
@@ -69,4 +136,166 @@ document.querySelectorAll(".tab").forEach(tab=>tab.onclick=()=>{document.querySe
   }catch(e){}
  }
  return best;
-}els.fileInput.onclick=()=>els.fileInput.value="";els.fileInput.onchange=async e=>{const f=e.target.files[0];if(f){try{const text=await readFile(f);loadCsv(text);toast('已匯入：'+f.name)}catch(err){console.error(err);reset('CSV 檔案讀取失敗，請確認檔案不是空白或被 Excel 鎖住。')}}};["dragenter","dragover"].forEach(t=>els.drop.addEventListener(t,e=>{e.preventDefault();els.drop.style.borderColor="var(--navy)"}));["dragleave","drop"].forEach(t=>els.drop.addEventListener(t,e=>{e.preventDefault();els.drop.style.borderColor="#9daba6"}));els.drop.addEventListener("drop",async e=>{const f=e.dataTransfer.files[0];if(f){try{const text=await readFile(f);loadCsv(text);toast('已匯入：'+f.name)}catch(err){console.error(err);reset('CSV 檔案讀取失敗，請確認檔案不是空白或被 Excel 鎖住。')}}});els.askHolding.onclick=ask;els.collectTargetPrice.onclick=collect;els.judgeTargetPrice.onclick=judge;els.targetInput.onchange=judge;els.stressScenario.onchange=applyScenario;[els.marketShock,els.betaShock].forEach(x=>x.oninput=stress);[els.cashInput,els.usdCashInput,els.usdRateInput,els.maxInvested,els.singleLimit,els.highGain].forEach(x=>x.onchange=()=>{if(state.rows.length)importPreview()});els.speakReview.onclick=speak;</script></body></html>
+}els.fileInput.onclick=()=>els.fileInput.value="";els.fileInput.onchange=async e=>{const f=e.target.files[0];if(f){try{const text=await readFile(f);loadCsv(text);toast('已匯入：'+f.name)}catch(err){console.error(err);reset('CSV 檔案讀取失敗，請確認檔案不是空白或被 Excel 鎖住。')}}};["dragenter","dragover"].forEach(t=>els.drop.addEventListener(t,e=>{e.preventDefault();els.drop.style.borderColor="var(--navy)"}));["dragleave","drop"].forEach(t=>els.drop.addEventListener(t,e=>{e.preventDefault();els.drop.style.borderColor="#9daba6"}));els.drop.addEventListener("drop",async e=>{const f=e.dataTransfer.files[0];if(f){try{const text=await readFile(f);loadCsv(text);toast('已匯入：'+f.name)}catch(err){console.error(err);reset('CSV 檔案讀取失敗，請確認檔案不是空白或被 Excel 鎖住。')}}});els.askHolding.onclick=ask;els.collectTargetPrice.onclick=collect;els.judgeTargetPrice.onclick=judge;els.targetInput.onchange=judge;els.stressScenario.onchange=applyScenario;[els.marketShock,els.betaShock].forEach(x=>x.oninput=stress);[els.cashInput,els.usdCashInput,els.usdRateInput,els.maxInvested,els.singleLimit,els.highGain].forEach(x=>x.onchange=()=>{if(state.rows.length)importPreview()});els.speakReview.onclick=speak;
+;
+(() => {
+  'use strict';
+  const stage = document.getElementById('majorStructure3d');
+  if (!stage || typeof state === 'undefined') return;
+  const card = stage.closest('.structure-card');
+  const sectors = ['半導體', '軟體與雲端', '電力設備', '能源', '金融', '醫療', '公用事業', '工業', '消費', '未分類'];
+  const tickerSectors = {
+    AMD:'半導體', ASML:'半導體', MRVL:'半導體', LRCX:'半導體', NVDA:'半導體', TSM:'半導體', AMAT:'半導體', AVGO:'半導體', MU:'半導體', INTC:'半導體', KLAC:'半導體', ARM:'半導體', LITE:'半導體', '2330':'半導體', '2454':'半導體',
+    MSFT:'軟體與雲端', GOOGL:'軟體與雲端', GOOG:'軟體與雲端', META:'軟體與雲端', PLTR:'軟體與雲端', CRM:'軟體與雲端', ORCL:'軟體與雲端',
+    GEV:'電力設備', ETN:'電力設備', VRT:'電力設備', XOM:'能源', CVX:'能源', COP:'能源', SLB:'能源',
+    JPM:'金融', BAC:'金融', GS:'金融', MS:'金融', V:'金融', MA:'金融', UNH:'醫療', LLY:'醫療', JNJ:'醫療', ABBV:'醫療', NEE:'公用事業', DUK:'公用事業', SO:'公用事業', LIN:'工業', CAT:'工業', GE:'工業', TSLA:'消費', AAPL:'消費', AMZN:'消費', COST:'消費'
+  };
+  const scenarios = {
+    inflation:{label:'通膨壓力／高利率',behavior:'現金流與估值篩選',targets:['能源','金融'],why:'能源價格若上行且需求穩定，能源獲利可能受惠；金融仍需確認信用損失與資金成本，高利率不等於全面利多。',confirm:'油價、信用利差、企業財測與 ETF 實際交易是否同步改善。'},
+    easing:{label:'通膨降溫／利率下行',behavior:'成長與利率敏感配置',targets:['半導體','公用事業'],why:'需求未衰退時，折現率下降可能支持成長與公用事業估值；若降息源於衰退，半導體需求可能反而承壓。',confirm:'實質利率下降、訂單維持與主動 ETF 持續買進，而不是只有股價推高權重。'},
+    ai:{label:'AI 資本支出擴張',behavior:'訂單與供給瓶頸配置',targets:['半導體','電力設備','軟體與雲端'],why:'支出與訂單若持續擴張，資金可能關注晶片、雲端與電力設備；需要獲利、自由現金流與估值共同支持。',confirm:'雲端實際資本支出、設備訂單、財測與經校正的 ETF 主動買進紀錄。'},
+    recession:{label:'成長放緩／防禦配置',behavior:'穩定需求與現金緩衝',targets:['醫療','公用事業'],why:'穩定需求產業可能相對抗跌，但醫療有政策風險，公用事業有槓桿與利率風險；防禦不保證上漲。',confirm:'就業、信用利差、獲利下修與防禦產業淨流入是否一致。'}
+  };
+  const safeUrl = value => { try { const u = new URL(value); return /^(https?:)$/.test(u.protocol) ? u.href : null; } catch { return null; } };
+  const make = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text != null) el.textContent = text; return el; };
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let paused = reduced.matches, visible = false, frame = 0, last = 0, phase = 0, selected = null, evidence = null, events = null;
+  let canvas, context, eventNode, managerNode, sectorNodes=[];
+  card.querySelector('h3').textContent='重大持股｜產業資金流向圖';
+  const tools = make('div','ark-flow-tools');
+  const select = document.createElement('select'); select.id = 'holdingsFlowScenario';
+  Object.entries(scenarios).forEach(([value,s]) => { const option = new Option(s.label,value); select.append(option); });
+  select.value = 'inflation';
+  const mode = document.createElement('select'); mode.id = 'holdingsFlowMode';
+  mode.append(new Option('總經條件推估','scenario'),new Option('ETF 證據資料','observed'));
+  [['總經情境',select],['流向依據',mode]].forEach(([text,input]) => { const label = make('label',null,text); label.append(input); tools.append(label); });
+  const motion = make('button'); motion.type='button';
+  motion.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>';
+  tools.append(motion); stage.before(tools);
+  const legend = make('div','ark-flow-legend');
+  [['','條件推估'],['actual','提供的淨流入'],['out','提供的淨流出']].forEach(([cls,text])=>{const item=make('span');item.append(make('i',cls),make('span',null,text));legend.append(item);});
+  const summary = make('div','ark-flow-summary'); summary.setAttribute('aria-live','polite');
+  const connect = make('details','ark-flow-connect');
+  connect.append(make('summary',null,'ETF 資料與來源'));
+  const notice=make('p',null,'交易／調整後持倉才能判斷經理人的配置慣性；權重上升、帳面虧損都不等於買進或資金流。');connect.append(notice);
+  const file=make('input');file.type='file';file.accept='.json,application/json';file.setAttribute('aria-label','匯入 ETF 資金流 JSON');
+  const endpoint=make('input');endpoint.type='url';endpoint.placeholder='https://你的服務/api/sector-flows';endpoint.setAttribute('aria-label','ETF 資金流 API 網址');
+  const refresh=make('button',null,'更新 ETF 資料');refresh.type='button';
+  const message=make('p','ark-flow-message');message.setAttribute('role','status');
+  const evidenceBox=make('div','ark-flow-evidence');
+  connect.append(file,endpoint,refresh,message,evidenceBox);
+  const contract=make('p',null,'JSON：asOf 與 flows 陣列；每筆包含 etf、manager、sector、netFlowTwd、weightDeltaPp、consecutiveBuys、observations、date、source。金額統一 TWD；只提供權重時不畫實際流量。');connect.append(contract);
+  const holdingsSource=make('a',null,'ARK ETF 交易資料');holdingsSource.href='https://www.ark-funds.com/ark-trade-notifications';holdingsSource.target='_blank';holdingsSource.rel='noopener';connect.append(holdingsSource);
+  stage.after(legend,summary,connect);
+
+  function sectorOf(row) {
+    // Broker exports often put market names in the sector field.
+    const raw=String(row.sector||'').trim();
+    if(sectors.includes(raw)&&raw!=='未分類')return raw;
+    if(/半導體|semiconductor/i.test(raw))return '半導體';
+    return tickerSectors[String(row.symbol).toUpperCase().replace(/\.TW$/,'')]||'未分類';
+  }
+  const holdingRows=()=>state.analyzed||[];
+  const displayedSectors=()=>[...new Set(['能源','半導體','金融','醫療','公用事業',...scenarios[select.value].targets,...holdingRows().map(sectorOf),...(evidence?.flows||[]).map(r=>r.sector)])];
+  const currentEvidence=sector=>(evidence?.flows||[]).filter(r=>r.sector===sector);
+  const flowFor=sector=>currentEvidence(sector).reduce((sum,r)=>sum+(r.netFlowTwd??0),0);
+  function link(text,url){const a=make('a',null,text);a.href=url;a.target='_blank';a.rel='noopener';return a;}
+  function detail(){
+    const s=scenarios[select.value],rows=holdingRows(),sector=selected||s.targets[0],matched=rows.filter(r=>sectorOf(r)===sector),weight=matched.reduce((sum,r)=>sum+r.weight,0);
+    summary.replaceChildren();
+    summary.append(make('strong',null,`${sector}｜配置觀察 · 部位 ${(weight*100).toFixed(1)}%`));
+    summary.append(make('p',null,matched.length?'對應持股：'+matched.map(r=>`${r.symbol} ${(r.weight*100).toFixed(1)}%`).join('、'):rows.length?'目前未持有此產業。':'尚未匯入持股，先顯示總經情境。'));
+    const asOf=events?.asOf;
+    const fresh=asOf&&Date.now()-Date.parse(asOf)<=86400000&&Date.now()>=Date.parse(asOf);
+    const dateText=asOf?new Date(asOf).toLocaleString('zh-TW'):'尚未取得';
+    summary.append(make('p','ark-flow-state',`事件快照：${dateText}${asOf&&!fresh?'（已超過 24 小時，待更新）':''}；${mode.value==='scenario'?'流向為條件推估，不是已發生的交易。':evidence?'ETF 資料由接口或檔案提供，未獨立核驗。':'尚未接入 ETF 交易，沒有實際資金流可顯示。'}`));
+    {
+      summary.append(make('p',null,sector==='未分類'?'產業未辨識，不繪製猜測路徑；請在 CSV 補入產業。':`組合內 ${sector} 合計 ${(weight*100).toFixed(1)}%（按總資產計）；產業依 CSV／代號對照，非即時分類。`));
+      if(mode.value==='observed'){
+        const items=currentEvidence(sector),net=flowFor(sector),valued=items.filter(r=>r.netFlowTwd!=null);
+        summary.append(make('p',null,valued.length?`提供資料的產業淨流量：NT$${net.toLocaleString('zh-TW')}；不是全市場流量，也不是本持股的個別流量。`:items.length?'只有配置／權重資料，無法確認實際資金流。':'此產業尚無 ETF 交易證據。'));
+        const patterns=items.filter(r=>r.consecutiveBuys>0);
+        summary.append(make('p',null,patterns.length?patterns.map(r=>`${r.etf}／${r.manager||'未提供團隊'}：${r.observations} 期中連續買進 ${r.consecutiveBuys} 期（來源 ${r.date}）`).join('；')+'。紀錄只能描述已提供的觀察期，不能保證下次加碼。':'經理人慣性：待歷史交易證據，無法推斷下一筆操作。'));
+      } else summary.append(make('p',null,s.targets.includes(sector)?`此產業是 ${s.label} 的條件關注方向。${s.why}`:`本情境主線：${s.targets.join('、')}；${sector} 不在主線，不繪製流入暗示。`));
+    }
+    summary.append(make('p',null,'確認訊號：'+s.confirm));
+    const highCon=weight>.35;
+    const highWater=state.lastSummary?.stockRatio>Number(document.getElementById('maxInvested').value)/100;
+    summary.append(make('p',null,'布局提示：'+(highWater?'股票水位已超過你設定的上限，先降低風險，不宜因流向動畫增加部位。':highCon?'此產業曝險超過總資產 35%（集中提醒門檻，非方舟位階），先檢查重疊部位與上限，避免持續堆高。':'先確認價格止穩、獲利與估值，再按部位上限分批觀察；不因超賣或題材單獨判定買點。')));
+    if(events?.events){events.events.forEach(e=>{const p=make('p');p.append(make('span',null,`${e.date}｜${e.title}：${e.summary} `),link('來源',e.source));summary.append(p);});}
+    if(!events)summary.append(make('p',null,'近期總經事件：尚未載入快照，不視為即時聯網。'));
+    summary.append(make('p','ark-flow-state','粒子速度／數量不代表金額或勝率；產業占比依匯入持股計算。'));
+  }
+  function choose(sector){selected=sector;sectorNodes.forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.sector===sector)));detail();}
+  function sync(){
+    stage.replaceChildren();stage.classList.add('ark-flow-stage','ark-network');sectorNodes=[];
+    canvas=make('canvas','ark-flow-canvas');canvas.setAttribute('aria-hidden','true');context=canvas.getContext('2d');stage.append(canvas);
+    const list=displayedSectors();stage.style.setProperty('--network-height',Math.max(560,list.length*96+80)+'px');
+    [['總經觸發',16],['配置行為',50],['產業方向',84]].forEach(([text,x])=>{const label=make('span','ark-network-column',text);label.style.left=x+'%';stage.append(label);});
+    function node(text,sub,x,y,cls){const b=make('button','ark-network-node '+cls);b.type='button';b.style.left=x+'%';b.style.top=y+'px';b.append(make('strong',null,text),make('small',null,sub));stage.append(b);return b;}
+    const s=scenarios[select.value],height=Math.max(560,list.length*96+80),observed=mode.value==='observed';
+    eventNode=node(s.label,'事件／條件',16,height*.52,'event');
+    managerNode=node(observed?'ETF 交易證據':s.behavior,observed?(evidence?'產業交易紀錄':'待接入資料'):'非特定經理人預測',50,height*.52,'manager');
+    eventNode.onclick=()=>{summary.replaceChildren(make('strong',null,s.label),make('p',null,s.why),make('p',null,'確認訊號：'+s.confirm));};
+    managerNode.onclick=()=>{summary.replaceChildren(make('strong',null,observed?'ETF 交易證據':s.behavior),make('p',null,observed?'下方 ETF 資料與來源列出提供的交易紀錄。':'配置行為屬總經條件推估；特定經理人的慣性須以歷史交易或校正後持倉確認。'));};
+    list.forEach((sector,i)=>{const members=holdingRows().filter(r=>sectorOf(r)===sector),weight=members.reduce((sum,r)=>sum+r.weight,0),net=flowFor(sector);const sub=observed?(net>0?'提供的淨流入':net<0?'提供的淨流出':'無已知淨流量'):s.targets.includes(sector)?'條件受惠觀察':'未列主線';const b=node(sector,sub,84,100+i*96,'sector');b.dataset.sector=sector;b.title=members.length?members.map(r=>r.symbol).join('、'):sector+'｜尚無持股';if(members.length)b.append(make('small','ark-network-weight','持股 '+(weight*100).toFixed(1)+'%'));b.onclick=()=>choose(sector);sectorNodes.push(b);});
+    if(!list.includes(selected))selected=s.targets[0];
+    choose(selected);update();
+  }
+  function size(){draw();}
+  function draw(){
+    if(!canvas||!context||!stage.clientWidth)return;
+    const w=stage.clientWidth,h=stage.clientHeight,dpr=Math.min(devicePixelRatio||1,2),rect=stage.getBoundingClientRect();
+    if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}
+    context.setTransform(dpr,0,0,dpr,0,0);context.clearRect(0,0,w,h);
+    context.fillStyle='#25475a';for(let x=14;x<w;x+=32)for(let y=48;y<h;y+=32){context.fillRect(x,y,1.5,1.5);}
+    const s=scenarios[select.value],observed=mode.value==='observed';
+    const anchor=(el,side)=>{const r=el.getBoundingClientRect();return{x:(side==='right'?r.right:r.left)-rect.left,y:r.top-rect.top+r.height/2};};
+    const paths=[];
+    if(!observed)paths.push({a:anchor(eventNode,'right'),z:anchor(managerNode,'left'),out:false});
+    sectorNodes.forEach(node=>{const sector=node.dataset.sector,net=flowFor(sector);if(observed?net===0:!s.targets.includes(sector))return;const origin=anchor(managerNode,'right'),end=anchor(node,'left'),out=observed&&net<0;paths.push({a:out?end:origin,z:out?origin:end,out});});
+    paths.forEach(({a,z,out})=>{
+      const mid=(a.x+z.x)/2,c1={x:mid,y:a.y},c2={x:mid,y:z.y};
+      const point=t=>{const u=1-t;return{x:u*u*u*a.x+3*u*u*t*c1.x+3*u*t*t*c2.x+t*t*t*z.x,y:u*u*u*a.y+3*u*u*t*c1.y+3*u*t*t*c2.y+t*t*t*z.y};};
+      const color=out?'#ff96aa':observed?'#6ae4e1':'#ffd079';context.strokeStyle=color;context.lineWidth=1.5;context.setLineDash(observed?[]:[4,7]);
+      context.beginPath();context.moveTo(a.x,a.y);context.bezierCurveTo(c1.x,c1.y,c2.x,c2.y,z.x,z.y);context.stroke();context.setLineDash([]);
+      for(let n=0;n<4;n++){const p=point((phase+n/4)%1);context.fillStyle=color;context.shadowColor=color;context.shadowBlur=8;context.beginPath();context.arc(p.x,p.y,2.6,0,Math.PI*2);context.fill();}context.shadowBlur=0;
+      const p=point(.7),q=point(.72),angle=Math.atan2(q.y-p.y,q.x-p.x);context.beginPath();context.moveTo(q.x-7*Math.cos(angle-.45),q.y-7*Math.sin(angle-.45));context.lineTo(q.x,q.y);context.lineTo(q.x-7*Math.cos(angle+.45),q.y-7*Math.sin(angle+.45));context.stroke();
+    });
+  }
+  function tick(time){frame=0;if(paused||!visible||document.hidden)return;phase=(phase+Math.min(time-last||0,60)/7000)%1;last=time;draw();frame=requestAnimationFrame(tick);}
+  function update(){
+    cancelAnimationFrame(frame);frame=0;stage.classList.toggle('ark-flow-paused',paused);
+    motion.title=paused?'恢復流動':'暫停流動';motion.setAttribute('aria-label',motion.title);motion.setAttribute('aria-pressed',String(paused));
+    motion.innerHTML=paused?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>';
+    detail();draw();if(!paused&&visible&&!document.hidden){last=0;frame=requestAnimationFrame(tick);}
+  }
+  function load(data){
+    if(!data||!Array.isArray(data.flows)||data.flows.length>500||!Number.isFinite(Date.parse(data.asOf))||Date.parse(data.asOf)>Date.now()+300000)throw Error('需要有效的 asOf 與 flows 陣列（最多 500 筆），不得使用未來資料日期。');
+    const keys=new Set();
+    data.flows.forEach((r,i)=>{
+      if(typeof r.etf!=='string'||!r.etf.trim()||!sectors.includes(r.sector)||!safeUrl(r.source)||!Number.isFinite(Date.parse(r.date))||Date.parse(r.date)>Date.now()+300000)throw Error(`第 ${i+1} 筆缺少有效 ETF、產業、來源或日期。`);
+      for(const key of ['netFlowTwd','weightDeltaPp','consecutiveBuys','observations'])if(r[key]!=null&&!Number.isFinite(r[key]))throw Error(`${key} 必須是數字或 null。`);
+      if(r.consecutiveBuys!=null&&(!Number.isInteger(r.consecutiveBuys)||r.consecutiveBuys<0||!Number.isInteger(r.observations)||r.observations<r.consecutiveBuys))throw Error('連續買進與觀察期數不合理。');
+      const key=[r.etf,r.sector,r.date].join('|');if(keys.has(key))throw Error('同 ETF／產業／日期資料重複，請先彙整，避免重複計算。');keys.add(key);
+    });
+    evidence=data;mode.value='observed';evidenceBox.replaceChildren();
+    const table=make('table'),head=make('thead'),tr=make('tr');['ETF／團隊','產業','淨流量 TWD','連續買進／期數','來源日期'].forEach(t=>tr.append(make('th',null,t)));head.append(tr);table.append(head);
+    const body=make('tbody');data.flows.forEach(r=>{const tr=make('tr');[r.etf+'／'+(r.manager||'未提供'),r.sector,r.netFlowTwd==null?'未取得':r.netFlowTwd.toLocaleString('zh-TW'),r.consecutiveBuys==null?'未取得':r.consecutiveBuys+'／'+r.observations].forEach(t=>tr.append(make('td',null,t)));const td=make('td');td.append(link(r.date,safeUrl(r.source)));tr.append(td);body.append(tr);});table.append(body);evidenceBox.append(table);
+    const age=Date.now()-Date.parse(data.asOf);message.textContent=`已載入 ${data.flows.length} 筆；資料日期 ${data.asOf}${age>86400000?'，已超過 24 小時，待更新':''}。淨流量需由來源計算與核驗，不以權重代替。`;sync();
+  }
+  select.onchange=()=>{selected=scenarios[select.value].targets[0];sync();};mode.onchange=sync;motion.onclick=()=>{paused=!paused;update();};
+  file.onchange=async()=>{const f=file.files[0];if(!f)return;try{load(JSON.parse(await f.text()));}catch(e){message.textContent='匯入失敗：'+e.message+'；保留既有資料。'}finally{file.value='';}};
+  refresh.onclick=async()=>{const url=safeUrl(endpoint.value);if(!url){message.textContent='請填入可使用的 HTTP(S) 接口。';return;}refresh.disabled=true;const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);try{const res=await fetch(url,{cache:'no-store',signal:controller.signal});if(!res.ok)throw Error('HTTP '+res.status);load(await res.json());}catch(e){message.textContent='更新失敗：'+e.message+'；保留既有資料。';}finally{clearTimeout(timer);refresh.disabled=false;}};
+  // Keep the existing import and reset lifecycle, then render the sector network.
+  const originalVisuals=visuals,originalReset=reset;
+  visuals=function(...args){const result=originalVisuals(...args);sync();return result;};
+  reset=function(...args){const result=originalReset(...args);sync();return result;};
+  new ResizeObserver(size).observe(stage);
+  new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;update();}).observe(stage);
+  document.addEventListener('visibilitychange',update);reduced.addEventListener('change',e=>{paused=e.matches;update();});
+  events = {"asOf":"2026-09-13T07:30:00Z","events":[{"date":"2026-09-11","title":"美國 8 月 CPI","summary":"官方摘要列示月增 0.40%、年增 3.40%；需檢查通膨對利率與估值的影響，不直接等同資金流入。","source":"https://www.jec.senate.gov/public/index.cfm/republicans/newsroom?ID=5F7E692C-B5B6-4BC3-8832-B0E282F150FD"},{"date":"2026-09-15–16（預定）","title":"FOMC 會議","summary":"觀察政策與預期差距；尚未公布的結果不視為事實，流向情境需在會議後再驗證。","source":"https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"}]}; detail();
+  sync();
+})();
+
+</script></body></html>
